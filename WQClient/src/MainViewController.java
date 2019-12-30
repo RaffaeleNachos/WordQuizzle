@@ -88,4 +88,10 @@ public class MainViewController {
 		}
 	}
 	
+	public void challengebtnAction(ActionEvent event) {
+		int err;
+		err = client_master.chall_handler(nickChall.getText());
+		ch_error.setText(WQClient.codetoString(err));
+	}
+	
 }

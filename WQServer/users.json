@@ -1,1 +1,1 @@
-{"a":{"username":"a","points":0,"stringfriends":["b","b","c"]},"b":{"username":"b","points":15,"stringfriends":["a","a","c"]},"c":{"username":"c","points":0,"stringfriends":["a","b"]}}
+{"a":{"username":"a","points":0,"stringfriends":["b"]},"b":{"username":"b","points":0,"stringfriends":["a"]}}

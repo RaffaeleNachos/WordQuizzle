@@ -3,7 +3,10 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class WQTask implements Runnable{
 	
@@ -18,6 +21,13 @@ public class WQTask implements Runnable{
 	@Override
 	public void run() {
 		System.out.println("Nuovo client eseguito da " + Thread.currentThread().getName());
+		DatagramSocket clientsocket = null;
+		try {
+			clientsocket = new DatagramSocket();
+		} catch (SocketException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -26,7 +36,7 @@ public class WQTask implements Runnable{
 			String[] tokens = line.split("\\s+");
 			while(!tokens[0].equals("LOGOUT")) {
 				if (tokens[0].equals("LOGIN")) {
-					writer.write(Integer.toString(db.user_login(tokens[1], tokens[2])));
+					writer.write(Integer.toString(db.user_login(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4]))));
 					writer.newLine(); 
 					writer.flush();
 				}
@@ -54,6 +64,13 @@ public class WQTask implements Runnable{
 					writer.write(db.show_ranking(tokens[1]).toJSONString());
 					writer.newLine();
 					writer.flush();
+				}
+				if (tokens[0].equals("CHALL")) {
+					writer.write(Integer.toString(db.challenge(tokens[1], tokens[2], clientsocket)));
+					writer.newLine();
+					writer.flush();
+					//clientsocket.receive(p);
+					//clientsocket.setSoTimeout(3000);
 				}
 				line = reader.readLine();
 				System.out.println("Server ho letto " + line);

@@ -12,6 +12,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.lang.reflect.Type;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -126,13 +128,15 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		else return 11;
 	}
 	
-	public synchronized int user_login(String nickname, String password) throws NullPointerException{
+	public synchronized int user_login(String nickname, String password, String ineta, int port) throws NullPointerException{
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (password == null) throw new NullPointerException("Invalid password (NULL)");
 		if (passwords.containsKey(nickname)) {
 			if (passwords.get(nickname).equals(hashMyPass(nickname + password))) {
 				if (users.get(nickname).isOnline() == true) return 15;
 				users.get(nickname).setOnline();
+				users.get(nickname).setIA(ineta);
+				users.get(nickname).setPort(port);
 				return 12;
 			}
 			else return 13;
@@ -206,6 +210,23 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		return null;
 	}
 	
+	public JSONArray show_ranking(String nickname) {
+		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
+		if (users.containsKey(nickname)) {
+			Iterator<User> itr = users.get(nickname).getOrderedFriends().iterator();
+			JSONArray lista = new JSONArray();
+			while(itr.hasNext()) {
+				JSONObject usr = new JSONObject();
+				User x = itr.next();
+				usr.put("username", x.getUsername());
+				usr.put("points", x.getPoints());
+				lista.add(usr);
+			}
+			return lista;
+		}
+		return null;
+	}
+	
 	public int show_points(String nickname) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {
@@ -213,19 +234,38 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		} else {
 			return -1;
 		}
-	} 
+	}
 	
-	public JSONArray show_ranking(String nickname) {
+	public int challenge(String nickname, String nickfriend, DatagramSocket s) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
+		if (nickfriend == null) throw new NullPointerException("Invalid friend's nickname (NULL)");
 		if (users.containsKey(nickname)) {
-			Iterator<User> itr = users.get(nickname).getOrderedFriends().iterator();
-			JSONArray lista = new JSONArray();
-			while(itr.hasNext()) {
-				lista.add(itr.next().getUsername());
+			if (users.containsKey(nickfriend)) {
+				if (users.get(nickname).getFriends().contains(nickfriend) == true) {
+					if(users.get(nickfriend).isOnline()) {
+						//UDP
+						String tmp = "CH " + nickname;
+						byte[] buffer=tmp.getBytes();
+						DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickfriend).getIA(), users.get(nickfriend).getPort());
+						try {
+							s.send(mypacket);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						System.out.println("ho inviato " + tmp);
+						return 21;
+					}
+					else return 22;
+				} else {
+					return 14;
+				}
+			} else {
+				return 14;
 			}
-			return lista;
+		} else {
+			return 14;
 		}
-		return null;
 	}
 	
 	private static String hashMyPass(String password) {

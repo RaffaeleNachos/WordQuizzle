@@ -1,3 +1,5 @@
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -8,6 +10,8 @@ public class User implements Comparable<User>{
 	private int points = 0;
 	private transient ArrayList<User> friends;
 	private ArrayList<String> stringfriends;
+	private transient InetAddress ia;
+	private transient int UDPport;
 	
 	public User(String username) {
 		this.username = username;
@@ -39,7 +43,28 @@ public class User implements Comparable<User>{
 		online = false;
 	}
 	
+	public void setIA(String i) {
+		try {
+			ia = InetAddress.getByName(i);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void setPort(int p) {
+		UDPport = p;
+	}
+	
+	public int  getPort() {
+		return UDPport;
+	}
+	
+	public InetAddress getIA() {
+		return ia;
+	}
+	
 	public int addFriend(User friend) {
+		//TODO aggiungere se stesso non si può fare
 		//necessario nel caso in cui il server deve ripartire dai dati su file json
 		if (friends == null) {
 			friends = new ArrayList<>();
@@ -47,16 +72,20 @@ public class User implements Comparable<User>{
 		if (friends.contains(friend)) return 0;
 		else {
 			friends.add(friend);
-			stringfriends.add(friend.getUsername());
+			if (!stringfriends.contains(friend.getUsername())) stringfriends.add(friend.getUsername());
 			return 1;
 		}
 	}
 	
 	public int removeFriend(User friend) {
+		//necessario nel caso in cui il server deve ripartire dai dati su file json
+		if (friends == null) {
+			friends = new ArrayList<>();
+		}
 		if (!friends.contains(friend)) return 0;
 		else {
 			friends.remove(friend);
-			stringfriends.remove(friend.getUsername());
+			if (stringfriends.contains(friend.getUsername())) stringfriends.remove(friend.getUsername());
 			return 1;
 		}
 	}

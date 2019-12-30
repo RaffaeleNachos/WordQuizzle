@@ -3,7 +3,10 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.file.Paths;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -13,12 +16,12 @@ import java.rmi.registry.Registry;
 import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;  
@@ -33,6 +36,8 @@ public class WQClient extends Application{
 	private BufferedReader reader;
 	private String user;
 	private JSONParser parser = new JSONParser();
+	private int UDPport;
+	private WQNotify thnotify;
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -109,8 +114,13 @@ public class WQClient extends Application{
 		try {
 			user = username;
 			c_socket = new Socket("localhost", 6790);
+			//creo porta e processo per le notifiche
+			UDPport = (int) ((Math.random() * ((65535 - 1024) + 1)) + 1024);
+			thnotify = new WQNotify(UDPport);
+			thnotify.start();
+			//scrivo tramite tcp le informazioni di login
 			writer = new BufferedWriter(new OutputStreamWriter(c_socket.getOutputStream()));
-			writer.write("LOGIN " + username + " " + password); 
+			writer.write("LOGIN " + username + " " + password + " " + c_socket.getInetAddress() + " " + UDPport); 
 			writer.newLine(); 
 			writer.flush();
 			reader = new BufferedReader(new InputStreamReader(c_socket.getInputStream())); 
@@ -126,6 +136,7 @@ public class WQClient extends Application{
 			writer.write("LOGOUT " + user); 
 			writer.newLine(); 
 			writer.flush();
+			if (thnotify.isAlive()) thnotify.interrupt();
 			return Integer.parseInt(reader.readLine());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -212,13 +223,26 @@ public class WQClient extends Application{
 				e.printStackTrace();
 			}
 			for(int i = 0; i<jsonOutArray.size(); i++) {
-				out.add(jsonOutArray.get(i).toString());
+				JSONObject usr = (JSONObject) jsonOutArray.get(i);
+				out.add(usr.get("username") + " \t Points:" + usr.get("points"));
 			}
 			return out;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public int chall_handler(String nickname) {
+		try {
+			writer.write("CHALL " + user + " " + nickname); 
+			writer.newLine(); 
+			writer.flush();
+			return Integer.parseInt(reader.readLine());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 	
 	public static String codetoString(int code) {
@@ -245,6 +269,10 @@ public class WQClient extends Application{
 				return "Non eravate amici";
 			case 20:
 				return "Avvenuta rimozione amicizia";
+			case 21:
+				return "Invio richiesta sfida...";
+			case 22:
+				return "Utente non online";
 			default:
 				return "Codice non riconosciuto";
 		}			
