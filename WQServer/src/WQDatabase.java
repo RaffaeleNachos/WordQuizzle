@@ -268,6 +268,20 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		}
 	}
 	
+	public void challengeaccepted(String nickfriend, DatagramSocket s) {
+		System.out.println("Server sto inviando Accepted");
+		String tmp = "ACCEPTED";
+		byte[] buffer=tmp.getBytes();
+		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickfriend).getIA(), users.get(nickfriend).getPort());
+		try {
+			s.send(mypacket);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("ho inviato " + tmp);		
+	}
+	
 	private static String hashMyPass(String password) {
 		byte[] hash = null;
 		try {

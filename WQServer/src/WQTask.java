@@ -69,8 +69,19 @@ public class WQTask implements Runnable{
 					writer.write(Integer.toString(db.challenge(tokens[1], tokens[2], clientsocket)));
 					writer.newLine();
 					writer.flush();
-					//clientsocket.receive(p);
+					byte[] buffer = new byte[1024];
+					DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
 					//clientsocket.setSoTimeout(3000);
+					clientsocket.receive(receivedPacket);
+					String byteToString = new String(receivedPacket.getData(), 0, receivedPacket.getLength());
+					String [] tokens2 = byteToString.split("\\s+");
+					System.out.println(byteToString);
+					if (tokens2[0].equals("ACCEPT")) {
+						db.challengeaccepted(tokens[1], clientsocket);
+					}
+					if (tokens2[0].equals("DECLINE")) {
+						//db.challengedeclined(tokens[2]);
+					}
 				}
 				line = reader.readLine();
 				System.out.println("Server ho letto " + line);

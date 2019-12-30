@@ -40,6 +40,7 @@ public class WQClient extends Application{
 	private WQNotify thnotify;
 	private RegisterLoginController logincontroller;
 	private MainViewController maincontroller;
+	private GameViewController gamecontroller;
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -90,6 +91,27 @@ public class WQClient extends Application{
             maincontroller.populateList(list_handler());
             maincontroller.setNotifyTabInvisible();
             thnotify.setController(maincontroller);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void gotoGame() {
+		try {
+			loader = new FXMLLoader();
+			loader.setLocation(Paths.get("src/views/GameView.fxml").toUri().toURL());
+			Parent layoutmain = loader.load();
+			Scene scene = stage.getScene();
+			if (scene == null) {
+        		scene = new Scene(layoutmain);
+            	stage.setScene(scene);
+        	} else {
+        		stage.getScene().setRoot(layoutmain);
+        	}
+			stage.sizeToScene();
+        	gamecontroller = loader.getController();
+            gamecontroller.setClient(this);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -257,6 +279,17 @@ public class WQClient extends Application{
 			e.printStackTrace();
 		}
 		return 0;
+	}
+	
+	public void accept_handler() {
+		thnotify.accept();
+		maincontroller.setNotifyTabInvisible();
+		gotoGame();
+	}
+	
+	public void decline_handler() {
+		thnotify.decline();
+		maincontroller.setNotifyTabInvisible();
 	}
 	
 	public static String codetoString(int code) {

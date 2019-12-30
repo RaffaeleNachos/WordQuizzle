@@ -104,11 +104,11 @@ public class MainViewController {
 	}
 	
 	public void declinebtnAction(ActionEvent event) {
-		
+		client_master.decline_handler();
 	}
 	
 	public void acceptbtnAction(ActionEvent event) {
-		
+		client_master.accept_handler();
 	}
 	
 	public void challengebtnAction(ActionEvent event) {
