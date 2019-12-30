@@ -10,6 +10,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.AnchorPane;
 
 public class MainViewController {
 	
@@ -30,6 +31,10 @@ public class MainViewController {
 	@FXML
 	private Button btnChallenge;
 	@FXML
+	private Button btnAccept;
+	@FXML
+	private Button btnDecline;
+	@FXML
 	private TextField nickChall;
 	@FXML
 	private Tab tabInfo;
@@ -37,6 +42,8 @@ public class MainViewController {
 	private Tab tabNotif;
 	@FXML
 	private ListView<String> listview;
+	@FXML
+	private AnchorPane notifyPane;
 
 	private WQClient client_master;
 	
@@ -46,6 +53,14 @@ public class MainViewController {
 	
 	public void setPoints(int num_points) {
 		points.setText(Integer.toString(num_points));
+	}
+	
+	public void setNotifyTabVisible() {
+		notifyPane.setVisible(true);
+	}
+	
+	public void setNotifyTabInvisible() {
+		notifyPane.setVisible(false);
 	}
 	
 	public void setUsername(String g_username) {
@@ -86,6 +101,14 @@ public class MainViewController {
 		} else {
 			populateList(client_master.list_handler());
 		}
+	}
+	
+	public void declinebtnAction(ActionEvent event) {
+		
+	}
+	
+	public void acceptbtnAction(ActionEvent event) {
+		
 	}
 	
 	public void challengebtnAction(ActionEvent event) {

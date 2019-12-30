@@ -38,6 +38,8 @@ public class WQClient extends Application{
 	private JSONParser parser = new JSONParser();
 	private int UDPport;
 	private WQNotify thnotify;
+	private RegisterLoginController logincontroller;
+	private MainViewController maincontroller;
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -60,8 +62,8 @@ public class WQClient extends Application{
         		stage.getScene().setRoot(layoutmain);
         	}
 			stage.sizeToScene();
-        	RegisterLoginController controller = loader.getController();
-            controller.setClient(this);
+        	logincontroller = loader.getController();
+            logincontroller.setClient(this);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -81,11 +83,13 @@ public class WQClient extends Application{
         		stage.getScene().setRoot(layoutmain);
         	}
 			stage.sizeToScene();
-        	MainViewController controller = loader.getController();
-            controller.setClient(this);
-            controller.setPoints(points_handler());
-            controller.setUsername(user);
-            controller.populateList(list_handler());
+        	maincontroller = loader.getController();
+            maincontroller.setClient(this);
+            maincontroller.setPoints(points_handler());
+            maincontroller.setUsername(user);
+            maincontroller.populateList(list_handler());
+            maincontroller.setNotifyTabInvisible();
+            thnotify.setController(maincontroller);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -116,15 +120,25 @@ public class WQClient extends Application{
 			c_socket = new Socket("localhost", 6790);
 			//creo porta e processo per le notifiche
 			UDPport = (int) ((Math.random() * ((65535 - 1024) + 1)) + 1024);
-			thnotify = new WQNotify(UDPport);
+			thnotify = new WQNotify(UDPport, this);
 			thnotify.start();
 			//scrivo tramite tcp le informazioni di login
 			writer = new BufferedWriter(new OutputStreamWriter(c_socket.getOutputStream()));
-			writer.write("LOGIN " + username + " " + password + " " + c_socket.getInetAddress() + " " + UDPport); 
+			writer.write("LOGIN " + username + " " + password + " " + c_socket.getInetAddress().getHostAddress() + " " + UDPport); 
 			writer.newLine(); 
 			writer.flush();
-			reader = new BufferedReader(new InputStreamReader(c_socket.getInputStream())); 
-			return Integer.parseInt(reader.readLine());
+			reader = new BufferedReader(new InputStreamReader(c_socket.getInputStream()));
+			int err = Integer.parseInt(reader.readLine());
+			//nel caso in cui il login è errato pulisco
+			if (err != 12) {
+				c_socket.close();
+				if (thnotify.isAlive()) thnotify.interrupt();
+				writer.close();
+				reader.close();
+				return err;
+			} else {
+				return err;
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

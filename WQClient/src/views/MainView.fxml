@@ -9,6 +9,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
@@ -23,13 +24,34 @@
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                <children>
-                  <SplitPane dividerPositions="0.4945945945945946" layoutX="-9.0" layoutY="-11.0" orientation="VERTICAL" prefHeight="372.0" prefWidth="295.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <SplitPane dividerPositions="0.3105263157894737" layoutX="-9.0" layoutY="-11.0" orientation="VERTICAL" prefHeight="372.0" prefWidth="295.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #212121;">
                            <children>
                               <TabPane layoutX="65.0" layoutY="-41.0" prefHeight="284.0" prefWidth="354.0" style="-fx-background-color: #0097A7;" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="-6.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <tabs>
-                                  <Tab fx:id="tabNotif" closable="false" style="-fx-background-color: #00BCD4;" text="Notifications" />
+                                  <Tab fx:id="tabNotif" closable="false" style="-fx-background-color: #00BCD4;" text="Notifications">
+                                       <content>
+                                          <AnchorPane fx:id="notifyPane" prefHeight="200.0" prefWidth="200.0">
+                                             <children>
+                                                <Button fx:id="btnAccept" layoutX="70.0" layoutY="74.0" mnemonicParsing="false" onAction="#acceptbtnAction" prefHeight="27.0" prefWidth="98.0" style="-fx-background-color: #FF9800;" text="Accept" AnchorPane.leftAnchor="70.0">
+                                                   <effect>
+                                                      <DropShadow />
+                                                   </effect>
+                                                </Button>
+                                                <Button fx:id="btnDecline" layoutX="186.0" layoutY="74.0" mnemonicParsing="false" onAction="#declinebtnAction" prefHeight="27.0" prefWidth="98.0" style="-fx-background-color: #D32F2F;" text="Decline" AnchorPane.rightAnchor="70.0">
+                                                   <effect>
+                                                      <DropShadow />
+                                                   </effect>
+                                                </Button>
+                                                <Label layoutX="104.0" layoutY="31.0" text="Challenge Notification">
+                                                   <font>
+                                                      <Font name="Arial" size="15.0" />
+                                                   </font>
+                                                </Label>
+                                             </children>
+                                          </AnchorPane>
+                                       </content></Tab>
                                   <Tab fx:id="tabInfo" closable="false" style="-fx-background-color: #00BCD4;" text="Your Info.">
                                     <content>
                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -63,33 +85,33 @@
                         </AnchorPane>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #0097A7;">
                            <children>
-                              <TextField fx:id="nickChall" layoutX="53.0" layoutY="24.0" prefHeight="30.0" prefWidth="248.0" />
-                              <Button fx:id="btnChallenge" layoutX="53.0" layoutY="68.0" mnemonicParsing="false" onAction="#challengebtnAction" prefHeight="27.0" prefWidth="123.0" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Challenge Him!">
+                              <TextField fx:id="nickChall" layoutX="53.0" layoutY="33.0" prefHeight="30.0" prefWidth="248.0" />
+                              <Button fx:id="btnChallenge" layoutX="116.0" layoutY="118.0" mnemonicParsing="false" onAction="#challengebtnAction" prefHeight="27.0" prefWidth="123.0" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Challenge Him!">
                                  <font>
                                     <Font name="Arial" size="15.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnLogout" layoutX="146.0" layoutY="234.0" mnemonicParsing="false" onAction="#logoutbtnAction" prefHeight="27.0" prefWidth="88.0" style="-fx-background-color: #D32F2F; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );" text="Logout">
+                              <Button fx:id="btnLogout" layoutX="133.0" layoutY="327.0" mnemonicParsing="false" onAction="#logoutbtnAction" prefHeight="27.0" prefWidth="88.0" style="-fx-background-color: #D32F2F; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );" text="Logout">
                                  <font>
                                     <Font name="Arial" size="15.0" />
                                  </font>
                               </Button>
-                              <ToggleButton fx:id="toggleRanking" layoutX="111.0" layoutY="191.0" mnemonicParsing="false" onAction="#togglebtnAction" selected="true" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Ranking / Friend List" textAlignment="CENTER">
+                              <ToggleButton fx:id="toggleRanking" layoutX="98.0" layoutY="284.0" mnemonicParsing="false" onAction="#togglebtnAction" selected="true" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Ranking / Friend List" textAlignment="CENTER">
                                  <font>
                                     <Font name="Arial" size="15.0" />
                                  </font>
                               </ToggleButton>
-                              <Label fx:id="ch_error" alignment="CENTER" layoutX="48.0" layoutY="110.0" prefHeight="32.0" prefWidth="256.0" textAlignment="CENTER">
+                              <Label fx:id="ch_error" alignment="CENTER" layoutX="49.0" layoutY="78.0" prefHeight="32.0" prefWidth="256.0" textAlignment="CENTER">
                                  <font>
                                     <Font name="Arial" size="15.0" />
                                  </font>
                               </Label>
-                              <Button fx:id="addbtnFriend" layoutX="190.0" layoutY="68.0" mnemonicParsing="false" onAction="#addbtnAction" prefHeight="27.0" prefWidth="52.0" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="ADD">
+                              <Button fx:id="addbtnFriend" layoutX="121.0" layoutY="157.0" mnemonicParsing="false" onAction="#addbtnAction" prefHeight="27.0" prefWidth="114.0" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Add Friend">
                                  <font>
                                     <Font name="Arial" size="15.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="delbtnFriend" layoutX="249.0" layoutY="68.0" mnemonicParsing="false" onAction="#delbtnAction" prefHeight="27.0" prefWidth="52.0" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="DEL">
+                              <Button fx:id="delbtnFriend" layoutX="108.0" layoutY="195.0" mnemonicParsing="false" onAction="#delbtnAction" prefHeight="27.0" prefWidth="140.0" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Remove Friend">
                                  <font>
                                     <Font name="Arial" size="15.0" />
                                  </font>

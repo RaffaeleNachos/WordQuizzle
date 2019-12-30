@@ -8,8 +8,9 @@ import java.net.SocketException;
 public class WQNotify extends Thread{
 	
 	private int port;
+	private MainViewController masterContr;
 	
-	public WQNotify (int port) {
+	public WQNotify (int port, WQClient client_master) {
 		this.port = port;
 	}
 	
@@ -24,7 +25,8 @@ public class WQNotify extends Thread{
 				System.out.println("sono in attesa UDP");
 				mys.receive(receivedPacket);
 				String byteToString = new String(receivedPacket.getData(), 0, receivedPacket.getLength());
-				System.out.println("Length " + receivedPacket.getLength() + " data " + byteToString);
+				String [] tokens = byteToString.split("\\s+");
+				masterContr.setNotifyTabVisible();
 			}
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
@@ -33,5 +35,9 @@ public class WQNotify extends Thread{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public void setController (MainViewController contr) {
+		this.masterContr = contr;
 	}
 }
