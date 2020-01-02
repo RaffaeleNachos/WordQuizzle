@@ -34,9 +34,10 @@ public class WQClient extends Application{
 	private static Stage stage;
 	private BufferedWriter writer;
 	private BufferedReader reader;
-	private String user;
+	public String user;
 	private JSONParser parser = new JSONParser();
 	private int UDPport;
+	private int TCPport;
 	private WQNotify thnotify;
 	private RegisterLoginController logincontroller;
 	private MainViewController maincontroller;
@@ -112,6 +113,7 @@ public class WQClient extends Application{
 			stage.sizeToScene();
         	gamecontroller = loader.getController();
             gamecontroller.setClient(this);
+            gamecontroller.setSocket(TCPport);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -271,7 +273,8 @@ public class WQClient extends Application{
 	
 	public int chall_handler(String nickname) {
 		try {
-			writer.write("CHALL " + user + " " + nickname); 
+			TCPport = (int) ((Math.random() * ((65535 - 1024) + 1)) + 1024);
+			writer.write("CHALL " + user + " " + nickname + " " + TCPport); 
 			writer.newLine(); 
 			writer.flush();
 			return Integer.parseInt(reader.readLine());
@@ -282,7 +285,8 @@ public class WQClient extends Application{
 	}
 	
 	public void accept_handler() {
-		thnotify.accept();
+		TCPport = (int) ((Math.random() * ((65535 - 1024) + 1)) + 1024);
+		thnotify.accept(TCPport);
 		maincontroller.setNotifyTabInvisible();
 		gotoGame();
 	}

@@ -66,6 +66,8 @@ public class WQTask implements Runnable{
 					writer.flush();
 				}
 				if (tokens[0].equals("CHALL")) {
+					int portasfidante = Integer.parseInt(tokens[3]);
+					int portasfidato;
 					writer.write(Integer.toString(db.challenge(tokens[1], tokens[2], clientsocket)));
 					writer.newLine();
 					writer.flush();
@@ -77,7 +79,10 @@ public class WQTask implements Runnable{
 					String [] tokens2 = byteToString.split("\\s+");
 					System.out.println(byteToString);
 					if (tokens2[0].equals("ACCEPT")) {
+						portasfidato = Integer.parseInt(tokens2[1]);
 						db.challengeaccepted(tokens[1], clientsocket);
+						WQChallenge wqc = new WQChallenge(portasfidante, portasfidato, socket.getInetAddress(), receivedPacket.getAddress());
+						wqc.start();
 					}
 					if (tokens2[0].equals("DECLINE")) {
 						//db.challengedeclined(tokens[2]);

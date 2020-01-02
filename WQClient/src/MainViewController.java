@@ -21,6 +21,8 @@ public class MainViewController {
 	@FXML
 	private Label points;
 	@FXML
+	private Label chnotificationlabel;
+	@FXML
 	private ToggleButton toggleRanking;
 	@FXML
 	private Button btnLogout;
@@ -55,7 +57,8 @@ public class MainViewController {
 		points.setText(Integer.toString(num_points));
 	}
 	
-	public void setNotifyTabVisible() {
+	public void setNotifyTabVisible(String nick) {
+		chnotificationlabel.setText(nick);
 		notifyPane.setVisible(true);
 	}
 	

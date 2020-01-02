@@ -269,7 +269,6 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	}
 	
 	public void challengeaccepted(String nickfriend, DatagramSocket s) {
-		System.out.println("Server sto inviando Accepted");
 		String tmp = "ACCEPTED";
 		byte[] buffer=tmp.getBytes();
 		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickfriend).getIA(), users.get(nickfriend).getPort());

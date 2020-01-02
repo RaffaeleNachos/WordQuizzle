@@ -6,6 +6,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
+import javafx.application.Platform;
+
 public class WQNotify extends Thread{
 	
 	private int port;
@@ -33,14 +35,24 @@ public class WQNotify extends Thread{
 				String [] tokens = byteToString.split("\\s+");
 				if (tokens[0].equals("CH")) {
 					System.out.println("Client ho ricevuto CH");
-					masterContr.setNotifyTabVisible();
 					destia = receivedPacket.getAddress();
 					destport = receivedPacket.getPort();
+					Platform.runLater(new Runnable() {
+						@Override
+			            public void run() {
+			            	masterContr.setNotifyTabVisible(tokens[1]);
+			            }
+			          });
 				}
 				if (tokens[0].equals("ACCEPTED")) {
 					System.out.println("Client ho ricevuto ACCEPTED");
-					//TODO FIX THIS SHIT
-					client_master.gotoGame();
+					//serve per aggiornare la usi nei thread javafx altrimenti non si può aggiornare.
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							client_master.gotoGame();
+			            }
+			        });
 				}
 				if (tokens[0].equals("DECLINED")) {
 					//client_master.gotoGame();
@@ -59,8 +71,8 @@ public class WQNotify extends Thread{
 		this.masterContr = contr;
 	}
 	
-	public void accept() {
-		String tmp = "ACCEPT";
+	public void accept(int port) {
+		String tmp = "ACCEPT " + port;
 		byte[] buffer=tmp.getBytes();
 		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, destia, destport);
 		try {
