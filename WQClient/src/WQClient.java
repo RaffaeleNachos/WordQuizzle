@@ -77,6 +77,13 @@ public class WQClient extends Application{
 			loader = new FXMLLoader();
 			loader.setLocation(Paths.get("src/views/MainView.fxml").toUri().toURL());
 			Parent layoutmain = loader.load();
+			maincontroller = loader.getController();
+            maincontroller.setClient(this);
+            maincontroller.setPoints(points_handler());
+            maincontroller.setUsername(user);
+            maincontroller.populateList(list_handler());
+            maincontroller.setNotifyTabInvisible();
+            thnotify.setController(maincontroller);
 			Scene scene = stage.getScene();
 			if (scene == null) {
         		scene = new Scene(layoutmain);
@@ -85,13 +92,6 @@ public class WQClient extends Application{
         		stage.getScene().setRoot(layoutmain);
         	}
 			stage.sizeToScene();
-        	maincontroller = loader.getController();
-            maincontroller.setClient(this);
-            maincontroller.setPoints(points_handler());
-            maincontroller.setUsername(user);
-            maincontroller.populateList(list_handler());
-            maincontroller.setNotifyTabInvisible();
-            thnotify.setController(maincontroller);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -45,6 +45,7 @@ public class GameViewController {
 	}
 	
 	public void sendbtnAction(ActionEvent event) {
+		//TODO check che abbia scritto meno di 512 caratteri! prendo la sottostringa
 		byteBuffer = ByteBuffer.wrap(engwordfield.getText().getBytes());
 		try {
 	    	while (byteBuffer.hasRemaining()) {

@@ -87,7 +87,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		}
 	}
 	
-	public String getFileStringy(String path) throws IOException {
+	public static String getFileStringy(String path) throws IOException {
 		//creo un channel per la lettura del file
 		FileChannel inChannel = FileChannel.open(Paths.get(path), StandardOpenOption.READ);
 		ByteBuffer buffer = ByteBuffer.allocateDirect(1024*1024);

@@ -67,6 +67,8 @@ public class WQTask implements Runnable{
 				}
 				if (tokens[0].equals("CHALL")) {
 					int TCPport = (int) ((Math.random() * ((65535 - 1024) + 1)) + 1024);
+					WQChallenge wqc = new WQChallenge(TCPport);
+					wqc.start();
 					writer.write(Integer.toString(db.challenge(tokens[1], tokens[2], clientsocket, TCPport)));
 					writer.newLine();
 					writer.flush();
@@ -78,11 +80,10 @@ public class WQTask implements Runnable{
 					String [] tokens2 = byteToString.split("\\s+");
 					System.out.println(byteToString);
 					if (tokens2[0].equals("ACCEPT")) {
-						WQChallenge wqc = new WQChallenge(TCPport);
-						wqc.start();
 						db.challengeaccepted(tokens[1], clientsocket, TCPport);
 					}
 					if (tokens2[0].equals("DECLINE")) {
+						if (wqc.isAlive()) wqc.interrupt();
 						//db.challengedeclined(tokens[2]);
 					}
 				}

@@ -16,10 +16,8 @@
    <bottom>
       <AnchorPane prefHeight="70.0" prefWidth="600.0" style="-fx-background-color: #0097A7;" BorderPane.alignment="CENTER">
          <children>
-            <ProgressBar layoutX="102.0" layoutY="10.0" prefHeight="20.0" prefWidth="471.0" progress="0.0" AnchorPane.leftAnchor="100.0" />
-            <ProgressBar layoutX="92.0" layoutY="39.0" prefHeight="20.0" prefWidth="471.0" progress="0.0" AnchorPane.leftAnchor="100.0" />
-            <Label layoutX="39.0" layoutY="12.0" text="YOU" />
-            <Label layoutX="14.0" layoutY="40.0" text="OPPONENT" />
+            <ProgressBar layoutX="100.0" layoutY="25.0" prefHeight="20.0" prefWidth="471.0" progress="0.0" AnchorPane.leftAnchor="100.0" />
+            <Label layoutX="39.0" layoutY="27.0" text="YOU" />
          </children>
       </AnchorPane>
    </bottom>
