@@ -236,7 +236,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		}
 	}
 	
-	public int challenge(String nickname, String nickfriend, DatagramSocket s) {
+	public int challenge(String nickname, String nickfriend, DatagramSocket s, int chport) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (nickfriend == null) throw new NullPointerException("Invalid friend's nickname (NULL)");
 		if (users.containsKey(nickname)) {
@@ -244,7 +244,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 				if (users.get(nickname).getFriends().contains(nickfriend) == true) {
 					if(users.get(nickfriend).isOnline()) {
 						//UDP
-						String tmp = "CH " + nickname;
+						String tmp = "CH " + nickname + " " + chport;
 						byte[] buffer=tmp.getBytes();
 						DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickfriend).getIA(), users.get(nickfriend).getPort());
 						try {
@@ -268,8 +268,8 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		}
 	}
 	
-	public void challengeaccepted(String nickfriend, DatagramSocket s) {
-		String tmp = "ACCEPTED";
+	public void challengeaccepted(String nickfriend, DatagramSocket s, int chport) {
+		String tmp = "ACCEPTED " + chport;
 		byte[] buffer=tmp.getBytes();
 		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickfriend).getIA(), users.get(nickfriend).getPort());
 		try {

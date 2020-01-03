@@ -1,10 +1,10 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -23,26 +23,21 @@ public class GameViewController {
 	
 	
 	private WQClient client_master;
-	private ServerSocket ss;
-	private Socket s_socket;
-	private BufferedReader reader;
-	private BufferedWriter writer;
-	private String currentword;
+	private SocketAddress socket;
+	private SocketChannel socketChannel;
+	private ByteBuffer byteBuffer;
 	
 	public void setClient(WQClient client) {
         this.client_master = client;
     }
 	
-	public void setSocket(int port) {
+	public void setSocket(int port, InetAddress ia) {
+		socket = new InetSocketAddress(ia, port);
 		try {
-			ss = new ServerSocket(port);
-			System.out.println(client_master.user + " aspetto sulla porta " + port);
-			s_socket = ss.accept();
-			System.out.println(client_master.user + " accettato");
-			reader = new BufferedReader(new InputStreamReader(s_socket.getInputStream()));
-			writer = new BufferedWriter(new OutputStreamWriter(s_socket.getOutputStream()));
-			currentword = reader.readLine();
-			itawordlabel.setText(currentword);
+			socketChannel = SocketChannel.open();
+			socketChannel.connect(socket);
+			System.out.println("Collegato a: " + socketChannel);
+			readStatus();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -50,10 +45,39 @@ public class GameViewController {
 	}
 	
 	public void sendbtnAction(ActionEvent event) {
+		byteBuffer = ByteBuffer.wrap(engwordfield.getText().getBytes());
 		try {
-			writer.write(engwordfield.getText());
-			writer.newLine(); 
-			writer.flush();
+	    	while (byteBuffer.hasRemaining()) {
+	    		System.out.println("Client | scrivo: " + socketChannel.write(byteBuffer) + " bytes");
+	    	}
+	    	byteBuffer.clear();
+	    	byteBuffer.flip();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void readStatus() {
+		System.out.println("Sono in lettura");
+		byteBuffer = ByteBuffer.allocate(1024);
+    	boolean stop = false;
+        String tmp = "";
+		try {
+	        while (!stop) {
+	        	byteBuffer.clear();
+	        	int bytesRead;
+				bytesRead = socketChannel.read(byteBuffer);
+	        	byteBuffer.flip();
+	        	tmp = tmp + StandardCharsets.UTF_8.decode(byteBuffer).toString();
+	        	byteBuffer.flip();
+	    		System.out.println("Client | leggo: " + bytesRead + " bytes");
+	    		if (bytesRead < 1024) {
+	        		stop=true;
+        		}
+        	}
+    		byteBuffer.flip();
+    		itawordlabel.setText(tmp);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

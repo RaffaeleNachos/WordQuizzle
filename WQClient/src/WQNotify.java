@@ -33,8 +33,10 @@ public class WQNotify extends Thread{
 				mys.receive(receivedPacket);
 				String byteToString = new String(receivedPacket.getData(), 0, receivedPacket.getLength());
 				String [] tokens = byteToString.split("\\s+");
+				//sfidato
 				if (tokens[0].equals("CH")) {
 					System.out.println("Client ho ricevuto CH");
+					client_master.setTCPport(Integer.parseInt(tokens[2]));
 					destia = receivedPacket.getAddress();
 					destport = receivedPacket.getPort();
 					Platform.runLater(new Runnable() {
@@ -44,7 +46,9 @@ public class WQNotify extends Thread{
 			            }
 			          });
 				}
+				//sfidante
 				if (tokens[0].equals("ACCEPTED")) {
+					client_master.setTCPport(Integer.parseInt(tokens[1]));
 					System.out.println("Client ho ricevuto ACCEPTED");
 					//serve per aggiornare la usi nei thread javafx altrimenti non si può aggiornare.
 					Platform.runLater(new Runnable() {
@@ -71,8 +75,8 @@ public class WQNotify extends Thread{
 		this.masterContr = contr;
 	}
 	
-	public void accept(int port) {
-		String tmp = "ACCEPT " + port;
+	public void accept() {
+		String tmp = "ACCEPT";
 		byte[] buffer=tmp.getBytes();
 		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, destia, destport);
 		try {
