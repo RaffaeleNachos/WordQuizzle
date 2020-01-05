@@ -7,6 +7,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
 public class WQTask implements Runnable{
 	
@@ -74,8 +75,17 @@ public class WQTask implements Runnable{
 					writer.flush();
 					byte[] buffer = new byte[1024];
 					DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
-					//clientsocket.setSoTimeout(3000);
-					clientsocket.receive(receivedPacket);
+					//TIMER T1 PER ACCETAZIONE SFIDA 30 secondi
+					clientsocket.setSoTimeout(30000);
+					try {
+						clientsocket.receive(receivedPacket);
+					} catch (SocketTimeoutException e) {
+						//allo sfidante mando non accettata
+						db.challengedeclined(tokens[1], clientsocket);
+						if (wqc.isAlive()) wqc.firealarm = true;
+						//allo sfidato mando timeout per eliminare la notifica
+						db.timeout(tokens[2], clientsocket);
+					}
 					String byteToString = new String(receivedPacket.getData(), 0, receivedPacket.getLength());
 					String [] tokens2 = byteToString.split("\\s+");
 					System.out.println(byteToString);
@@ -83,8 +93,9 @@ public class WQTask implements Runnable{
 						db.challengeaccepted(tokens[1], clientsocket, TCPport);
 					}
 					if (tokens2[0].equals("DECLINE")) {
-						if (wqc.isAlive()) wqc.interrupt();
-						//db.challengedeclined(tokens[2]);
+						db.challengedeclined(tokens[1], clientsocket);
+						if (wqc.isAlive()) wqc.firealarm = true;
+						System.out.println("killed");
 					}
 				}
 				line = reader.readLine();

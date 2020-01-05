@@ -24,6 +24,7 @@ public class WQChallenge extends Thread{
 	private JSONArray jarr;
 	private ArrayList<String> selectedWords;
 	private static int K = 5;
+	public volatile boolean firealarm = false;
 	
 	public WQChallenge(int port) {
 		this.port = port;
@@ -70,7 +71,7 @@ public class WQChallenge extends Thread{
 		} catch (IOException ex) { 
 			ex.printStackTrace();
 		}
-		while (true) { 
+		while (!firealarm) { 
 			try {
 				//System.out.println(selector.keys());
 				//System.out.println(selector.selectedKeys());
@@ -102,7 +103,13 @@ public class WQChallenge extends Thread{
 						System.out.println("Server | pronta una chiave in scrittura");
 						SocketChannel client = (SocketChannel) key.channel();
 						WQWord myWord = (WQWord) key.attachment();
-						if (myWord.getWord() == null) myWord.setWord(selectedWords.get(myWord.getIndex()));
+						if (myWord.getWord() == null) {
+							if (myWord.getIndex() < K) myWord.setWord(selectedWords.get(myWord.getIndex()));
+							else {
+								System.out.println("mando chend");
+								myWord.setWord("CHEND");
+							}
+						}
 						ByteBuffer end = ByteBuffer.wrap(myWord.getWord().getBytes());
 						int bWrite = client.write(end);
 						//se ho scritto tutto rimetto la chiave in read

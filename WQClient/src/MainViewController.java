@@ -15,7 +15,7 @@ import javafx.scene.layout.AnchorPane;
 public class MainViewController {
 	
 	@FXML
-	private Label ch_error;
+	public Label ch_error;
 	@FXML
 	private Label username;
 	@FXML

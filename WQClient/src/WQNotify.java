@@ -33,6 +33,7 @@ public class WQNotify extends Thread{
 				mys.receive(receivedPacket);
 				String byteToString = new String(receivedPacket.getData(), 0, receivedPacket.getLength());
 				String [] tokens = byteToString.split("\\s+");
+				
 				//sfidato
 				if (tokens[0].equals("CH")) {
 					System.out.println("Client ho ricevuto CH");
@@ -46,6 +47,16 @@ public class WQNotify extends Thread{
 			            }
 			          });
 				}
+				if (tokens[0].equals("TIMEOUT")) {
+					System.out.println("Client ho ricevuto TIMEOUT");
+					Platform.runLater(new Runnable() {
+						@Override
+			            public void run() {
+			            	masterContr.setNotifyTabInvisible();
+			            }
+			          });
+				}
+				
 				//sfidante
 				if (tokens[0].equals("ACCEPTED")) {
 					client_master.setTCPport(Integer.parseInt(tokens[1]));
@@ -59,7 +70,14 @@ public class WQNotify extends Thread{
 			        });
 				}
 				if (tokens[0].equals("DECLINED")) {
-					//client_master.gotoGame();
+					System.out.println("Client ho ricevuto DECLINED");
+					//serve per aggiornare la usi nei thread javafx altrimenti non si può aggiornare.
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							masterContr.ch_error.setText("Challenge Not Accepted");
+			            }
+			        });
 				}
 			}
 		} catch (SocketException e) {
@@ -85,6 +103,7 @@ public class WQNotify extends Thread{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		masterContr.setNotifyTabInvisible();
 	}
 	
 	public void decline() {

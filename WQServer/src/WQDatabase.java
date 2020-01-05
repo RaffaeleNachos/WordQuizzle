@@ -268,8 +268,36 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		}
 	}
 	
+	//inviati allo sfidante
 	public void challengeaccepted(String nickfriend, DatagramSocket s, int chport) {
 		String tmp = "ACCEPTED " + chport;
+		byte[] buffer=tmp.getBytes();
+		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickfriend).getIA(), users.get(nickfriend).getPort());
+		try {
+			s.send(mypacket);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("ho inviato " + tmp);		
+	}
+	
+	public void challengedeclined(String nickfriend, DatagramSocket s) {
+		String tmp = "DECLINED";
+		byte[] buffer=tmp.getBytes();
+		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickfriend).getIA(), users.get(nickfriend).getPort());
+		try {
+			s.send(mypacket);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("ho inviato " + tmp);		
+	}
+	
+	//inviati allo sfidato
+	public void timeout(String nickfriend, DatagramSocket s) {
+		String tmp = "TIMEOUT";
 		byte[] buffer=tmp.getBytes();
 		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickfriend).getIA(), users.get(nickfriend).getPort());
 		try {

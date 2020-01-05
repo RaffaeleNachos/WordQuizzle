@@ -57,6 +57,8 @@ public class GameViewController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		engwordfield.clear();
+		readStatus();
 	}
 	
 	public void readStatus() {
@@ -78,7 +80,8 @@ public class GameViewController {
         		}
         	}
     		byteBuffer.flip();
-    		itawordlabel.setText(tmp);
+    		if (!tmp.equals("CHEND")) itawordlabel.setText(tmp);
+    		else client_master.gotoMain();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
