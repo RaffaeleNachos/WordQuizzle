@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -32,13 +33,16 @@ public class WQChallenge extends Thread{
 	private ArrayList<String> selectedWords;
 	private ArrayList<String> translatedWords;
 	private static int K = 5;
-	public volatile boolean firealarm = false;
 	private WQDatabase db;
 	private JSONParser parser;
+	private volatile AtomicInteger endusers;
+	public volatile AtomicInteger firealarm;
 	
 	public WQChallenge(int port, WQDatabase db) {
 		this.port = port;
 		this.db = db;
+		endusers = new AtomicInteger(0);
+		firealarm = new AtomicInteger(0);
 		selectedWords = new ArrayList<>();
 		translatedWords = new ArrayList<>();
 		parser = new JSONParser();
@@ -99,17 +103,17 @@ public class WQChallenge extends Thread{
 					JSONObject smallobj = (JSONObject) bigobj.get("responseData");
 					//toLowercase perchè spesso la traduzione ha delle lettere maiuscole e può dare problemi per il controllo di correttezza
 					translatedWords.add(i, (String) smallobj.get("translatedText").toString().toLowerCase());
-					System.out.println("Traduzioni: " + translatedWords.toString());
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 	            conn.disconnect();
 			}
+			System.out.println("Traduzioni: " + translatedWords.toString());
 		} catch (IOException ex) { 
 			ex.printStackTrace();
 		}
-		while (!firealarm) { 
+		while (firealarm.get() == 0 && endusers.get() != 2) { 
 			try {
 				//System.out.println(selector.keys());
 				//System.out.println(selector.selectedKeys());
@@ -150,6 +154,7 @@ public class WQChallenge extends Thread{
 							} else {
 								System.out.println("mando chend");
 								myWord.setWord("CHEND");
+								endusers.incrementAndGet();
 							}
 						}
 						ByteBuffer end = ByteBuffer.wrap(myWord.getWord().getBytes());
@@ -228,6 +233,7 @@ public class WQChallenge extends Thread{
 				}
 			}
 		}
+		System.out.println("Challenge Thread Shutdown...");
 	}
 	
 	public class WQWord {

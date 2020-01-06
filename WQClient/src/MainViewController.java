@@ -31,7 +31,7 @@ public class MainViewController {
 	@FXML
 	private Button delbtnFriend;
 	@FXML
-	private Button btnChallenge;
+	public Button btnChallenge;
 	@FXML
 	private Button btnAccept;
 	@FXML
@@ -118,6 +118,10 @@ public class MainViewController {
 		int err;
 		err = client_master.chall_handler(nickChall.getText());
 		ch_error.setText(WQClient.codetoString(err));
+		if (err==21) {
+			btnChallenge.setStyle("-fx-background-color: #DEDEE0");
+			btnChallenge.setDisable(true);
+		}
 	}
 	
 }

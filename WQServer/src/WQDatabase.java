@@ -81,7 +81,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	            //System.out.println(list);
 	            Iterator<String> itr = list.iterator();
 				while (itr.hasNext()) {
-					System.out.println(users.get(key).addFriend(users.get(itr.next())));
+					users.get(key).addFriend(users.get(itr.next()));
 				}
 	        }
 		}

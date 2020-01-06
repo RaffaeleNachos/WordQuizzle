@@ -7,116 +7,117 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<TitledPane animated="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" text="Word Quizzle" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainViewController">
-   <content>
-      <SplitPane dividerPositions="0.5484949832775919" prefHeight="160.0" prefWidth="200.0">
+<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #213862;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainViewController">
+   <children>
+      <SplitPane dividerPositions="0.5" prefHeight="608.0" prefWidth="800.0">
         <items>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #213862;">
                <children>
-                  <ListView fx:id="listview" layoutX="73.0" layoutY="56.0" prefHeight="572.0" prefWidth="434.0" style="-fx-background-color: #0097A7; -fx-border-color: #0097A7;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <ListView fx:id="listview" layoutX="73.0" layoutY="56.0" prefHeight="572.0" prefWidth="434.0" style="-fx-background-color: #213862; -fx-border-color: #213862;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #213862;">
                <children>
                   <SplitPane dividerPositions="0.3105263157894737" layoutX="-9.0" layoutY="-11.0" orientation="VERTICAL" prefHeight="372.0" prefWidth="295.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #212121;">
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #213862;">
                            <children>
-                              <TabPane layoutX="65.0" layoutY="-41.0" prefHeight="284.0" prefWidth="354.0" style="-fx-background-color: #0097A7;" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="-6.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <TabPane layoutX="65.0" layoutY="-41.0" prefHeight="284.0" prefWidth="354.0" style="-fx-background-color: #213862;" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="-6.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <tabs>
-                                  <Tab fx:id="tabNotif" closable="false" style="-fx-background-color: #00BCD4;" text="Notifications">
+                                  <Tab fx:id="tabNotif" closable="false" text="Notifications">
                                        <content>
-                                          <AnchorPane fx:id="notifyPane" prefHeight="200.0" prefWidth="200.0">
+                                          <AnchorPane fx:id="notifyPane" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #213862;">
                                              <children>
-                                                <Button fx:id="btnAccept" layoutX="64.0" layoutY="88.0" mnemonicParsing="false" onAction="#acceptbtnAction" prefHeight="27.0" prefWidth="98.0" style="-fx-background-color: #FF9800;" text="Accept" AnchorPane.leftAnchor="70.0">
+                                                <Button fx:id="btnAccept" layoutX="69.0" layoutY="95.0" mnemonicParsing="false" onAction="#acceptbtnAction" prefHeight="27.0" prefWidth="98.0" style="-fx-background-color: #FF9800;" text="Accept" AnchorPane.leftAnchor="70.0" AnchorPane.rightAnchor="230.0">
                                                    <effect>
                                                       <DropShadow />
                                                    </effect>
                                                 </Button>
-                                                <Button fx:id="btnDecline" layoutX="195.0" layoutY="88.0" mnemonicParsing="false" onAction="#declinebtnAction" prefHeight="27.0" prefWidth="98.0" style="-fx-background-color: #D32F2F;" text="Decline" AnchorPane.rightAnchor="70.0">
+                                                <Button fx:id="btnDecline" layoutX="225.0" layoutY="95.0" mnemonicParsing="false" onAction="#declinebtnAction" prefHeight="27.0" prefWidth="98.0" style="-fx-background-color: #E3463F;" text="Decline" AnchorPane.leftAnchor="230.0" AnchorPane.rightAnchor="70.0">
                                                    <effect>
                                                       <DropShadow />
                                                    </effect>
                                                 </Button>
-                                                <Label layoutX="85.0" layoutY="14.0" text="Challenge Notification from:">
+                                                <Label layoutX="104.0" layoutY="24.0" text="Challenge Notification from:" textFill="WHITE" AnchorPane.leftAnchor="104.0" AnchorPane.rightAnchor="104.0">
                                                    <font>
                                                       <Font name="Arial" size="15.0" />
                                                    </font>
                                                 </Label>
-                                                <Label fx:id="chnotificationlabel" alignment="CENTER" layoutX="142.0" layoutY="46.0" text="username">
+                                                <Label fx:id="chnotificationlabel" alignment="CENTER" contentDisplay="CENTER" layoutX="104.0" layoutY="62.0" text="username" textFill="WHITE" AnchorPane.leftAnchor="104.0" AnchorPane.rightAnchor="104.0" AnchorPane.topAnchor="60.0">
                                                    <font>
                                                       <Font name="Arial Bold" size="15.0" />
                                                    </font>
                                                 </Label>
                                              </children>
                                           </AnchorPane>
-                                       </content></Tab>
-                                  <Tab fx:id="tabInfo" closable="false" style="-fx-background-color: #00BCD4;" text="Your Info.">
+                                       </content>
+                                    </Tab>
+                                  <Tab fx:id="tabInfo" closable="false" text="Your Info.">
                                     <content>
-                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #213862;">
                                              <children>
-                                                <Label layoutX="14.0" layoutY="7.0" prefHeight="37.0" prefWidth="110.0" text="Username:">
+                                                <Label layoutX="14.0" layoutY="7.0" prefHeight="37.0" prefWidth="110.0" text="Username:" textFill="WHITE" AnchorPane.leftAnchor="20.0">
                                                    <font>
                                                       <Font name="Arial" size="15.0" />
                                                    </font>
                                                 </Label>
-                                                <Label layoutX="14.0" layoutY="44.0" prefHeight="37.0" prefWidth="110.0" text="Points:">
+                                                <Label layoutX="14.0" layoutY="44.0" prefHeight="37.0" prefWidth="110.0" text="Points:" textFill="WHITE" AnchorPane.leftAnchor="20.0">
                                                    <font>
                                                       <Font name="Arial" size="15.0" />
                                                    </font>
                                                 </Label>
-                                                <Label fx:id="points" layoutX="69.0" layoutY="44.0" prefHeight="37.0" prefWidth="110.0" text="9999">
+                                                <Label fx:id="points" layoutX="75.0" layoutY="44.0" prefHeight="37.0" prefWidth="110.0" text="9999" textFill="WHITE" AnchorPane.leftAnchor="75.0">
                                                    <font>
                                                       <Font name="Arial" size="15.0" />
                                                    </font>
                                                 </Label>
-                                                <Label fx:id="username" layoutX="99.0" layoutY="7.0" prefHeight="37.0" prefWidth="110.0" text="user">
+                                                <Label fx:id="username" layoutX="103.0" layoutY="7.0" prefHeight="37.0" prefWidth="110.0" text="user" textFill="WHITE" AnchorPane.leftAnchor="105.0">
                                                    <font>
                                                       <Font name="Arial" size="15.0" />
                                                    </font>
                                                 </Label>
-                                             </children></AnchorPane>
+                                             </children>
+                                          </AnchorPane>
                                     </content>
                                   </Tab>
                                 </tabs>
                               </TabPane>
                            </children>
                         </AnchorPane>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #0097A7;">
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #213862;">
                            <children>
-                              <TextField fx:id="nickChall" layoutX="53.0" layoutY="33.0" prefHeight="30.0" prefWidth="248.0" />
-                              <Button fx:id="btnChallenge" layoutX="116.0" layoutY="118.0" mnemonicParsing="false" onAction="#challengebtnAction" prefHeight="27.0" prefWidth="123.0" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Challenge Him!">
+                              <TextField fx:id="nickChall" layoutX="73.0" layoutY="33.0" prefHeight="30.0" prefWidth="248.0" AnchorPane.leftAnchor="70.0" AnchorPane.rightAnchor="70.0" />
+                              <Button fx:id="btnChallenge" layoutX="137.0" layoutY="123.0" mnemonicParsing="false" onAction="#challengebtnAction" prefHeight="27.0" prefWidth="123.0" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Challenge Him!" AnchorPane.leftAnchor="135.0" AnchorPane.rightAnchor="135.0">
                                  <font>
                                     <Font name="Arial" size="15.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btnLogout" layoutX="133.0" layoutY="327.0" mnemonicParsing="false" onAction="#logoutbtnAction" prefHeight="27.0" prefWidth="88.0" style="-fx-background-color: #D32F2F; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );" text="Logout">
+                              <Button fx:id="btnLogout" layoutX="153.0" layoutY="335.0" mnemonicParsing="false" onAction="#logoutbtnAction" prefHeight="27.0" prefWidth="88.0" style="-fx-background-color: #E3463F; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );" text="Logout" AnchorPane.leftAnchor="140.0" AnchorPane.rightAnchor="140.0">
                                  <font>
                                     <Font name="Arial" size="15.0" />
                                  </font>
                               </Button>
-                              <ToggleButton fx:id="toggleRanking" layoutX="98.0" layoutY="284.0" mnemonicParsing="false" onAction="#togglebtnAction" selected="true" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Ranking / Friend List" textAlignment="CENTER">
+                              <ToggleButton fx:id="toggleRanking" layoutX="120.0" layoutY="295.0" mnemonicParsing="false" onAction="#togglebtnAction" selected="true" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Ranking / Friend List" textAlignment="CENTER" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="110.0">
                                  <font>
                                     <Font name="Arial" size="15.0" />
                                  </font>
                               </ToggleButton>
-                              <Label fx:id="ch_error" alignment="CENTER" layoutX="49.0" layoutY="78.0" prefHeight="32.0" prefWidth="256.0" textAlignment="CENTER">
+                              <Label fx:id="ch_error" alignment="CENTER" layoutX="70.0" layoutY="76.0" prefHeight="32.0" prefWidth="256.0" textAlignment="CENTER" textFill="WHITE" AnchorPane.leftAnchor="70.0" AnchorPane.rightAnchor="70.0">
                                  <font>
                                     <Font name="Arial" size="15.0" />
                                  </font>
                               </Label>
-                              <Button fx:id="addbtnFriend" layoutX="121.0" layoutY="157.0" mnemonicParsing="false" onAction="#addbtnAction" prefHeight="27.0" prefWidth="114.0" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Add Friend">
+                              <Button fx:id="addbtnFriend" layoutX="142.0" layoutY="161.0" mnemonicParsing="false" onAction="#addbtnAction" prefHeight="27.0" prefWidth="114.0" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Add Friend" AnchorPane.leftAnchor="145.0" AnchorPane.rightAnchor="145.0">
                                  <font>
                                     <Font name="Arial" size="15.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="delbtnFriend" layoutX="108.0" layoutY="195.0" mnemonicParsing="false" onAction="#delbtnAction" prefHeight="27.0" prefWidth="140.0" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Remove Friend">
+                              <Button fx:id="delbtnFriend" layoutX="129.0" layoutY="200.0" mnemonicParsing="false" onAction="#delbtnAction" prefHeight="27.0" prefWidth="140.0" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-color: #FF9800;" text="Remove Friend" AnchorPane.leftAnchor="135.0" AnchorPane.rightAnchor="135.0">
                                  <font>
                                     <Font name="Arial" size="15.0" />
                                  </font>
@@ -129,8 +130,5 @@
             </AnchorPane>
         </items>
       </SplitPane>
-   </content>
-   <font>
-      <Font name="Arial" size="15.0" />
-   </font>
-</TitledPane>
+   </children>
+</AnchorPane>

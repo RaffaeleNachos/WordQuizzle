@@ -82,7 +82,7 @@ public class WQTask implements Runnable{
 					} catch (SocketTimeoutException e) {
 						//allo sfidante mando non accettata
 						db.challengedeclined(tokens[1], clientsocket);
-						if (wqc.isAlive()) wqc.firealarm = true;
+						if (wqc.isAlive()) wqc.firealarm.incrementAndGet();
 						//allo sfidato mando timeout per eliminare la notifica
 						db.timeout(tokens[2], clientsocket);
 					}
@@ -94,7 +94,7 @@ public class WQTask implements Runnable{
 					}
 					if (tokens2[0].equals("DECLINE")) {
 						db.challengedeclined(tokens[1], clientsocket);
-						if (wqc.isAlive()) wqc.firealarm = true;
+						if (wqc.isAlive()) wqc.firealarm.incrementAndGet();
 						System.out.println("killed");
 					}
 				}

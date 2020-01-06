@@ -76,6 +76,8 @@ public class WQNotify extends Thread{
 						@Override
 						public void run() {
 							masterContr.ch_error.setText("Challenge Not Accepted");
+							masterContr.btnChallenge.setStyle("-fx-background-color: #FF9800");
+							masterContr.btnChallenge.setDisable(false);
 			            }
 			        });
 				}
