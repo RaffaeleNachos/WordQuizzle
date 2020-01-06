@@ -133,8 +133,8 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		if (password == null) throw new NullPointerException("Invalid password (NULL)");
 		if (passwords.containsKey(nickname)) {
 			if (passwords.get(nickname).equals(hashMyPass(nickname + password))) {
-				if (users.get(nickname).isOnline() == true) return 15;
-				users.get(nickname).setOnline();
+				if (users.get(nickname).online == true) return 15;
+				users.get(nickname).online = true;
 				users.get(nickname).setIA(ineta);
 				users.get(nickname).setPort(port);
 				return 12;
@@ -148,7 +148,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	public synchronized int user_logout(String nickname) throws NullPointerException{
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {
-				users.get(nickname).setOffline();
+				users.get(nickname).online = false;
 				return 16;
 		} else {
 			return 14;
@@ -218,8 +218,8 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 			while(itr.hasNext()) {
 				JSONObject usr = new JSONObject();
 				User x = itr.next();
-				usr.put("username", x.getUsername());
-				usr.put("points", x.getPoints());
+				usr.put("username", x.username);
+				usr.put("points", x.points);
 				lista.add(usr);
 			}
 			return lista;
@@ -230,9 +230,18 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	public int show_points(String nickname) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {
-			return users.get(nickname).getPoints();
+			return users.get(nickname).points;
 		} else {
 			return -1;
+		}
+	}
+	
+	public User getUser(String nickname) {
+		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
+		if (users.containsKey(nickname)) {
+			return users.get(nickname);
+		} else {
+			return null;
 		}
 	}
 	
@@ -242,7 +251,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		if (users.containsKey(nickname)) {
 			if (users.containsKey(nickfriend)) {
 				if (users.get(nickname).getFriends().contains(nickfriend) == true) {
-					if(users.get(nickfriend).isOnline()) {
+					if(users.get(nickfriend).online == true) {
 						//UDP
 						String tmp = "CH " + nickname + " " + chport;
 						byte[] buffer=tmp.getBytes();

@@ -68,7 +68,7 @@ public class WQTask implements Runnable{
 				}
 				if (tokens[0].equals("CHALL")) {
 					int TCPport = (int) ((Math.random() * ((65535 - 1024) + 1)) + 1024);
-					WQChallenge wqc = new WQChallenge(TCPport);
+					WQChallenge wqc = new WQChallenge(TCPport, db);
 					wqc.start();
 					writer.write(Integer.toString(db.challenge(tokens[1], tokens[2], clientsocket, TCPport)));
 					writer.newLine();

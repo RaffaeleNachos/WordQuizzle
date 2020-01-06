@@ -1,6 +1,10 @@
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -11,7 +15,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -23,12 +30,18 @@ public class WQChallenge extends Thread{
 	private ServerSocketChannel serverChannel;
 	private JSONArray jarr;
 	private ArrayList<String> selectedWords;
+	private ArrayList<String> translatedWords;
 	private static int K = 5;
 	public volatile boolean firealarm = false;
+	private WQDatabase db;
+	private JSONParser parser;
 	
-	public WQChallenge(int port) {
+	public WQChallenge(int port, WQDatabase db) {
 		this.port = port;
+		this.db = db;
 		selectedWords = new ArrayList<>();
+		translatedWords = new ArrayList<>();
+		parser = new JSONParser();
 		String strjson = null;
 		try {
 			strjson = WQDatabase.getFileStringy("./words.json");
@@ -44,7 +57,6 @@ public class WQChallenge extends Thread{
 			e.printStackTrace();
 		}
 		for (int i = 0; i < K; i++) {
-			//todo probelma
 			//System.out.println(jarr.toString());
 			//System.out.println("size: " + (int) (Math.random() * ((jarr.size()))) + " prima parola " + (String) jarr.get(0) + " parola scelta " + (String) jarr.get((int) (Math.random() * ((jarr.size())))));
 			selectedWords.add((String) jarr.get((int) ((Math.random() * ((jarr.size()))))));
@@ -53,7 +65,7 @@ public class WQChallenge extends Thread{
 	
 	public void run() {
 		try {
-			System.out.println("Parole scelte: " + selectedWords.toString());
+			System.out.println("Parole: " + selectedWords.toString());
 			//creo ServerSocketChannel per poterlo settare in modalità non bloccante
 			//il SocketChannel è creato implicitamente
 			serverChannel = ServerSocketChannel.open();
@@ -68,6 +80,32 @@ public class WQChallenge extends Thread{
 			//per ora sto in ascolto solo sulla key (della socket del server) che identifica la accept
 			selector = Selector.open(); 
 			serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+			
+			//traduzione k parole
+			for (int i = 0; i < selectedWords.size(); i++) {
+				URL url = new URL("https://api.mymemory.translated.net/get?q=" + selectedWords.get(i) + "&langpair=it|en");
+	            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+	            conn.setRequestMethod("GET");
+	            conn.setRequestProperty("Accept", "application/json");
+	            if (conn.getResponseCode() != 200) 
+	            {
+	                throw new RuntimeException("Failed, error code " + conn.getResponseCode());
+	            }
+	 
+	            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+	            String apiOutput = br.readLine();
+	            try {
+					JSONObject bigobj = (JSONObject) parser.parse(apiOutput);
+					JSONObject smallobj = (JSONObject) bigobj.get("responseData");
+					//toLowercase perchè spesso la traduzione ha delle lettere maiuscole e può dare problemi per il controllo di correttezza
+					translatedWords.add(i, (String) smallobj.get("translatedText").toString().toLowerCase());
+					System.out.println("Traduzioni: " + translatedWords.toString());
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	            conn.disconnect();
+			}
 		} catch (IOException ex) { 
 			ex.printStackTrace();
 		}
@@ -104,8 +142,12 @@ public class WQChallenge extends Thread{
 						SocketChannel client = (SocketChannel) key.channel();
 						WQWord myWord = (WQWord) key.attachment();
 						if (myWord.getWord() == null) {
-							if (myWord.getIndex() < K) myWord.setWord(selectedWords.get(myWord.getIndex()));
-							else {
+							//mando nuova parola e double che indica la percentuale della progressbar da settare
+							if (myWord.getIndex() < K) {
+								double perc = ((double) myWord.getIndex() / (double) K);
+								System.out.println(perc);
+								myWord.setWord(selectedWords.get(myWord.getIndex()) + " " + perc);
+							} else {
 								System.out.println("mando chend");
 								myWord.setWord("CHEND");
 							}
@@ -157,6 +199,10 @@ public class WQChallenge extends Thread{
 							input.flip();
 							read = read + StandardCharsets.UTF_8.decode(input).toString();
 							System.out.println(read);
+							//tokenizzo la stringa di risposta e avvio un thread che mi controlla la correttezza della traduzione
+							String token[] = read.split("\\s+");
+							WQCheckWord wqcheck = new WQCheckWord(db, token[1], token[0], translatedWords.get(myWord.getIndex()));
+							wqcheck.start();
 							myWord.setWord(null);
 							myWord.incIndex();
 							key.attach(myWord);

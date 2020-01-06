@@ -16,7 +16,7 @@
    <bottom>
       <AnchorPane prefHeight="70.0" prefWidth="600.0" style="-fx-background-color: #0097A7;" BorderPane.alignment="CENTER">
          <children>
-            <ProgressBar layoutX="100.0" layoutY="25.0" prefHeight="20.0" prefWidth="471.0" progress="0.0" AnchorPane.leftAnchor="100.0" />
+            <ProgressBar fx:id="progressBar" layoutX="100.0" layoutY="25.0" prefHeight="20.0" prefWidth="471.0" progress="0.0" AnchorPane.leftAnchor="100.0" />
             <Label layoutX="39.0" layoutY="27.0" text="YOU" />
          </children>
       </AnchorPane>

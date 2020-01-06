@@ -10,6 +10,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 
 public class GameViewController {
@@ -20,6 +21,8 @@ public class GameViewController {
 	private TextField engwordfield;
 	@FXML
 	private Button btnsend;
+	@FXML
+	private ProgressBar progressBar;
 	
 	
 	private WQClient client_master;
@@ -46,7 +49,8 @@ public class GameViewController {
 	
 	public void sendbtnAction(ActionEvent event) {
 		//TODO check che abbia scritto meno di 512 caratteri! prendo la sottostringa
-		byteBuffer = ByteBuffer.wrap(engwordfield.getText().getBytes());
+		String tosend = client_master.user + " " + engwordfield.getText();
+		byteBuffer = ByteBuffer.wrap(tosend.getBytes());
 		try {
 	    	while (byteBuffer.hasRemaining()) {
 	    		System.out.println("Client | scrivo: " + socketChannel.write(byteBuffer) + " bytes");
@@ -80,7 +84,11 @@ public class GameViewController {
         		}
         	}
     		byteBuffer.flip();
-    		if (!tmp.equals("CHEND")) itawordlabel.setText(tmp);
+    		String token[] = tmp.split("\\s+");
+    		if (!token[0].equals("CHEND")) {
+    			itawordlabel.setText(token[0]);
+    			progressBar.setProgress(Double.parseDouble(token[1]));
+    		}
     		else client_master.gotoMain();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

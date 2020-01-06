@@ -100,9 +100,9 @@ public class MainViewController {
 	
 	public void togglebtnAction(ActionEvent event) {
 		if (toggleRanking.isSelected()) {
-			populateList(client_master.rank_handler());
-		} else {
 			populateList(client_master.list_handler());
+		} else {
+			populateList(client_master.rank_handler());
 		}
 	}
 	
