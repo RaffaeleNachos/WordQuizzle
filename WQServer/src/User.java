@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.Iterator;
 
 public class User implements Comparable<User>{
-	private transient boolean online = false;
-	private String username;
-	private int points = 0;
+	public transient boolean online = false;
+	public String username;
+	public int points = 0;
 	private transient ArrayList<User> friends;
 	private ArrayList<String> stringfriends;
 	private transient InetAddress ia;
@@ -17,30 +17,6 @@ public class User implements Comparable<User>{
 		this.username = username;
 		friends = new ArrayList<>();
 		stringfriends = new ArrayList<>();
-	}
-	
-	public int getPoints() {
-		return points;
-	}
-	
-	public boolean isOnline() {
-		return online;
-	}
-	
-	public String getUsername() {
-		return username;
-	}
-	
-	public void setPoints(int value) {
-		points = value;
-	}
-	
-	public void setOnline() {
-		online = true;
-	}
-	
-	public void setOffline() {
-		online = false;
 	}
 	
 	public void setIA(String i) {
@@ -72,7 +48,7 @@ public class User implements Comparable<User>{
 		if (friends.contains(friend)) return 0;
 		else {
 			friends.add(friend);
-			if (!stringfriends.contains(friend.getUsername())) stringfriends.add(friend.getUsername());
+			if (!stringfriends.contains(friend.username)) stringfriends.add(friend.username);
 			return 1;
 		}
 	}
@@ -85,7 +61,7 @@ public class User implements Comparable<User>{
 		if (!friends.contains(friend)) return 0;
 		else {
 			friends.remove(friend);
-			if (stringfriends.contains(friend.getUsername())) stringfriends.remove(friend.getUsername());
+			if (stringfriends.contains(friend.username)) stringfriends.remove(friend.username);
 			return 1;
 		}
 	}
@@ -101,7 +77,7 @@ public class User implements Comparable<User>{
 	
 	@Override
     public int compareTo(User u) {
-        int comparePoints= u.getPoints();
+        int comparePoints= u.points;
         return comparePoints-this.points;
     }
 	
