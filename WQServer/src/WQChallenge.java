@@ -113,7 +113,7 @@ public class WQChallenge extends Thread{
 		} catch (IOException ex) { 
 			ex.printStackTrace();
 		}
-		while (firealarm.get() == 0 && endusers.get() != 2) { 
+		while (firealarm.get() == 0 && endusers.get() != 2 && !Thread.currentThread().isInterrupted()) { 
 			try {
 				//System.out.println(selector.keys());
 				//System.out.println(selector.selectedKeys());

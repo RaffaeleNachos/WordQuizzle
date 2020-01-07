@@ -70,32 +70,41 @@ public class WQTask implements Runnable{
 					int TCPport = (int) ((Math.random() * ((65535 - 1024) + 1)) + 1024);
 					WQChallenge wqc = new WQChallenge(TCPport, db);
 					wqc.start();
-					writer.write(Integer.toString(db.challenge(tokens[1], tokens[2], clientsocket, TCPport)));
-					writer.newLine();
-					writer.flush();
-					byte[] buffer = new byte[1024];
-					DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
-					//TIMER T1 PER ACCETAZIONE SFIDA 30 secondi
-					clientsocket.setSoTimeout(30000);
-					try {
-						clientsocket.receive(receivedPacket);
-					} catch (SocketTimeoutException e) {
-						//allo sfidante mando non accettata
-						db.challengedeclined(tokens[1], clientsocket);
-						if (wqc.isAlive()) wqc.firealarm.incrementAndGet();
-						//allo sfidato mando timeout per eliminare la notifica
-						db.timeout(tokens[2], clientsocket);
-					}
-					String byteToString = new String(receivedPacket.getData(), 0, receivedPacket.getLength());
-					String [] tokens2 = byteToString.split("\\s+");
-					System.out.println(byteToString);
-					if (tokens2[0].equals("ACCEPT")) {
-						db.challengeaccepted(tokens[1], clientsocket, TCPport);
-					}
-					if (tokens2[0].equals("DECLINE")) {
-						db.challengedeclined(tokens[1], clientsocket);
-						if (wqc.isAlive()) wqc.firealarm.incrementAndGet();
-						System.out.println("killed");
+					int err = db.challenge(tokens[1], tokens[2], clientsocket, TCPport);
+					if (err!=21 && wqc.isAlive()) {
+						wqc.firealarm.incrementAndGet();
+						writer.write(Integer.toString(err));
+						writer.newLine();
+						writer.flush();
+					} else {
+						writer.write(Integer.toString(err));
+						writer.newLine();
+						writer.flush();
+						byte[] buffer = new byte[1024];
+						DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
+						//TIMER T1 PER ACCETAZIONE SFIDA 30 secondi
+						clientsocket.setSoTimeout(30000);
+						try {
+							clientsocket.receive(receivedPacket);
+						} catch (SocketTimeoutException e) {
+							//allo sfidante mando non accettata
+							db.challengedeclined(tokens[1], clientsocket);
+							//unico metodo per fermare il thread bloccato sulla select
+							if (wqc.isAlive()) wqc.interrupt();
+							//allo sfidato mando timeout per eliminare la notifica
+							db.timeout(tokens[2], clientsocket);
+						}
+						String byteToString = new String(receivedPacket.getData(), 0, receivedPacket.getLength());
+						String [] tokens2 = byteToString.split("\\s+");
+						System.out.println(byteToString);
+						if (tokens2[0].equals("ACCEPT")) {
+							db.challengeaccepted(tokens[1], clientsocket, TCPport);
+						}
+						if (tokens2[0].equals("DECLINE")) {
+							db.challengedeclined(tokens[1], clientsocket);
+							if (wqc.isAlive()) wqc.firealarm.incrementAndGet();
+							System.out.println("killed");
+						}
 					}
 				}
 				line = reader.readLine();
@@ -107,7 +116,6 @@ public class WQTask implements Runnable{
 			writer.flush();
 			System.out.println("Thread Exiting...");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
