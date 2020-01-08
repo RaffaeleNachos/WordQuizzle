@@ -14,9 +14,19 @@
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GameViewController">
    <bottom>
-      <AnchorPane prefHeight="70.0" prefWidth="600.0" style="-fx-background-color: #213862;" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="106.0" prefWidth="600.0" style="-fx-background-color: #213862;" BorderPane.alignment="CENTER">
          <children>
-            <ProgressBar fx:id="progressBar" layoutX="25.0" layoutY="25.0" prefHeight="20.0" prefWidth="546.0" progress="0.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" />
+            <ProgressBar fx:id="progressBar" layoutX="25.0" layoutY="60.0" prefHeight="20.0" prefWidth="419.0" progress="0.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="150.0" />
+            <Label fx:id="labelStatus" alignment="CENTER" contentDisplay="CENTER" layoutX="50.0" layoutY="23.0" text="Status..." textFill="WHITE" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
+               <font>
+                  <Font name="Arial" size="15.0" />
+               </font>
+            </Label>
+            <Button fx:id="btnExit" alignment="CENTER" layoutX="469.0" layoutY="56.0" mnemonicParsing="false" onAction="#exitbtnAction" style="-fx-background-color: #E3463F;" text="Exit Challenge" AnchorPane.rightAnchor="22.0">
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Button>
          </children>
       </AnchorPane>
    </bottom>
@@ -25,7 +35,7 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #213862;">
                <children>
-                  <ImageView fitHeight="95.0" fitWidth="156.0" layoutX="77.0" layoutY="49.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="70.0" AnchorPane.rightAnchor="70.0">
+                  <ImageView fitHeight="95.0" fitWidth="156.0" layoutX="77.0" layoutY="49.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="70.0" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="45.0">
                      <image>
                         <Image url="@it.png" />
                      </image>
@@ -33,7 +43,7 @@
                         <DropShadow />
                      </effect>
                   </ImageView>
-                  <Label fx:id="itawordlabel" alignment="CENTER" layoutX="25.0" layoutY="200.0" prefHeight="41.0" prefWidth="246.0" text="parola" textAlignment="CENTER" textFill="WHITE" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="200.0">
+                  <Label fx:id="itawordlabel" alignment="CENTER" layoutX="25.0" layoutY="200.0" prefHeight="41.0" prefWidth="246.0" text="parola" textAlignment="CENTER" textFill="WHITE" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="170.0">
                      <font>
                         <Font name="Arial" size="15.0" />
                      </font>
@@ -42,7 +52,7 @@
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #213862;">
                <children>
-                  <ImageView fitHeight="110.0" fitWidth="156.0" layoutX="70.0" layoutY="49.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="70.0" AnchorPane.rightAnchor="70.0">
+                  <ImageView fitHeight="110.0" fitWidth="156.0" layoutX="70.0" layoutY="49.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="70.0" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="45.0">
                      <image>
                         <Image url="@en.png" />
                      </image>
@@ -50,12 +60,12 @@
                         <DropShadow />
                      </effect>
                   </ImageView>
-                  <TextField fx:id="engwordfield" alignment="CENTER" layoutX="25.0" layoutY="198.0" prefHeight="41.0" prefWidth="246.0" promptText="your translation" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="200.0">
+                  <TextField fx:id="engwordfield" alignment="CENTER" layoutX="25.0" layoutY="172.0" prefHeight="41.0" prefWidth="246.0" promptText="your translation" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="170.0">
                      <font>
                         <Font name="Arial" size="15.0" />
                      </font>
                   </TextField>
-                  <Button fx:id="btnSend" alignment="CENTER" layoutX="123.0" layoutY="268.0" mnemonicParsing="false" onAction="#sendbtnAction" style="-fx-background-color: #FF9800;" text="Send" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="120.0">
+                  <Button fx:id="btnSend" alignment="CENTER" layoutX="120.0" layoutY="237.0" mnemonicParsing="false" onAction="#sendbtnAction" style="-fx-background-color: #FF9800;" text="Send" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="120.0" AnchorPane.topAnchor="235.0">
                      <effect>
                         <DropShadow />
                      </effect>

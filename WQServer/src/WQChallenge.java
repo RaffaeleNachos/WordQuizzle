@@ -148,6 +148,7 @@ public class WQChallenge extends Thread{
 						if (myWord.getWord() == null) {
 							//mando nuova parola e double che indica la percentuale della progressbar da settare
 							if (myWord.getIndex() < K) {
+								//TODO aggiungere la parola iniziale e non partire da zero!
 								double perc = ((double) myWord.getIndex() / (double) K);
 								System.out.println(perc);
 								myWord.setWord(selectedWords.get(myWord.getIndex()) + " " + perc);
@@ -204,15 +205,21 @@ public class WQChallenge extends Thread{
 							input.flip();
 							read = read + StandardCharsets.UTF_8.decode(input).toString();
 							System.out.println(read);
-							//tokenizzo la stringa di risposta e avvio un thread che mi controlla la correttezza della traduzione
-							String token[] = read.split("\\s+");
-							WQCheckWord wqcheck = new WQCheckWord(db, token[1], token[0], translatedWords.get(myWord.getIndex()));
-							wqcheck.start();
-							myWord.setWord(null);
-							myWord.incIndex();
-							key.attach(myWord);
-							key.interestOps(SelectionKey.OP_WRITE);
-							System.out.println("Server | key impostata su write");
+							if (read.equals("CHEXITED")) {
+								endusers.incrementAndGet();
+								key.cancel();
+								key.channel().close();
+							} else {
+								//tokenizzo la stringa di risposta e avvio un thread che mi controlla la correttezza della traduzione
+								String token[] = read.split("\\s+");
+								WQCheckWord wqcheck = new WQCheckWord(db, token[1], token[0], translatedWords.get(myWord.getIndex()));
+								wqcheck.start();
+								myWord.setWord(null);
+								myWord.incIndex();
+								key.attach(myWord);
+								key.interestOps(SelectionKey.OP_WRITE);
+								System.out.println("Server | key impostata su write");
+							}
 						}
 						//se il client chiude la socket o termina, la read restituisce -1
 						else if (bRead == -1) {

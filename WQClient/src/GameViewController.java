@@ -20,9 +20,13 @@ public class GameViewController {
 	@FXML
 	private TextField engwordfield;
 	@FXML
-	private Button btnsend;
+	public Button btnSend;
+	@FXML
+	public Button btnExit;
 	@FXML
 	private ProgressBar progressBar;
+	@FXML
+	public Label labelStatus;
 	
 	
 	private WQClient client_master;
@@ -89,10 +93,30 @@ public class GameViewController {
     			itawordlabel.setText(token[0]);
     			progressBar.setProgress(Double.parseDouble(token[1]));
     		}
-    		else client_master.gotoMain();
+    		else {
+    			labelStatus.setText("Challenge ended. Your score will be updated soon!");
+    			btnSend.setStyle("-fx-background-color: #DEDEE0");
+				btnSend.setDisable(true);
+    		}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public void exitbtnAction(ActionEvent event) {
+		String tosend = "CHEXITED";
+		byteBuffer = ByteBuffer.wrap(tosend.getBytes());
+		try {
+	    	while (byteBuffer.hasRemaining()) {
+	    		System.out.println("Client | scrivo: " + socketChannel.write(byteBuffer) + " bytes");
+	    	}
+	    	byteBuffer.clear();
+	    	byteBuffer.flip();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		client_master.gotoMain();
 	}
 }

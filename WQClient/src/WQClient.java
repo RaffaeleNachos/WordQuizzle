@@ -100,6 +100,10 @@ public class WQClient extends Application{
 			loader = new FXMLLoader();
 			loader.setLocation(Paths.get("src/views/GameView.fxml").toUri().toURL());
 			Parent layoutmain = loader.load();
+			//setto controller per il gioco
+			gamecontroller = loader.getController();
+            gamecontroller.setClient(this);
+            gamecontroller.setSocket(TCPport, c_socket.getInetAddress());
 			Scene scene = stage.getScene();
 			if (scene == null) {
         		scene = new Scene(layoutmain);
@@ -108,9 +112,8 @@ public class WQClient extends Application{
         		stage.getScene().setRoot(layoutmain);
         	}
 			stage.sizeToScene();
-        	gamecontroller = loader.getController();
-            gamecontroller.setClient(this);
-            gamecontroller.setSocket(TCPport, c_socket.getInetAddress());
+			//parte il timer del gioco appena viene caricata la gui di gioco
+			new ChTimer(60, gamecontroller);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
