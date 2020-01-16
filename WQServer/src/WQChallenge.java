@@ -40,6 +40,8 @@ public class WQChallenge extends Thread{
 	private JSONParser parser;
 	private volatile AtomicInteger endusers;
 	public volatile AtomicInteger firealarm;
+	private static int correctPoint = 3;
+	private static int wrongPoint = -1;
 	
 	public WQChallenge(int port, WQDatabase db) {
 		this.port = port;
@@ -191,8 +193,7 @@ public class WQChallenge extends Thread{
 							} else {
 								//tokenizzo la stringa di risposta e avvio un thread che mi controlla la correttezza della traduzione
 								String token[] = read.split("\\s+");
-								WQCheckWord wqcheck = new WQCheckWord(db, token[1], token[0], translatedWords.get(myWord.getIndex()), myWord.stat);
-								wqcheck.start();
+								checkWords(token[1], token[0], translatedWords.get(myWord.getIndex()), myWord.stat);
 								myWord.setWord(null);
 								myWord.incIndex();
 								key.attach(myWord);
@@ -292,6 +293,22 @@ public class WQChallenge extends Thread{
 				e.printStackTrace();
 			}
             conn.disconnect();
+		}
+	}
+	
+	public void checkWords(String word, String username, String cTransl, Statistics stats) {
+		//costo O(1) per avere l'istanza dell'utente per aggiornare il punteggio direttamente nel database
+		User u = db.getUser(username);
+		if (u!=null) {
+			if(word.equals(cTransl)) {
+				u.points = u.points + correctPoint;
+				stats.chPoints = stats.chPoints + correctPoint;
+				stats.correctWords++;
+			} else {
+				u.points = u.points + wrongPoint;
+				stats.chPoints = stats.chPoints + wrongPoint;
+				stats.wrongWords++;
+			}
 		}
 	}
 }

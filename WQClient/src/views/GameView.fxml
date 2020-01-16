@@ -43,7 +43,7 @@
                         <DropShadow />
                      </effect>
                   </ImageView>
-                  <Label fx:id="itawordlabel" alignment="CENTER" layoutX="25.0" layoutY="200.0" prefHeight="41.0" prefWidth="246.0" text="parola" textAlignment="CENTER" textFill="WHITE" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="170.0">
+                  <Label fx:id="itawordlabel" alignment="CENTER" contentDisplay="CENTER" layoutX="25.0" layoutY="200.0" prefHeight="41.0" prefWidth="246.0" text="parola" textAlignment="CENTER" textFill="WHITE" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="170.0">
                      <font>
                         <Font name="Arial" size="15.0" />
                      </font>

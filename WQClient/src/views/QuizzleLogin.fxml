@@ -21,22 +21,22 @@
             <Font name="Arial" size="15.0" />
          </font>
       </Button>
-      <Button id="Login" fx:id="registerbtn" layoutX="310.0" layoutY="301.0" mnemonicParsing="false" onAction="#registerbtnAction" prefHeight="27.0" prefWidth="128.0" style="-fx-background-color: #FF9800; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );;" text="Register" textFill="#212121">
+      <Button id="Login" fx:id="registerbtn" layoutX="310.0" layoutY="301.0" mnemonicParsing="false" onAction="#registerbtnAction" prefHeight="27.0" prefWidth="128.0" style="-fx-background-color: F26D00; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );" text="Register" textFill="#212121">
          <font>
             <Font name="Arial" size="15.0" />
          </font>
       </Button>
-      <PasswordField fx:id="passfield" layoutX="162.0" layoutY="239.0" prefHeight="41.0" prefWidth="276.0" promptText="password" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );;">
+      <PasswordField fx:id="passfield" alignment="CENTER" layoutX="162.0" layoutY="239.0" prefHeight="41.0" prefWidth="276.0" promptText="password" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );;">
          <font>
             <Font name="Arial" size="15.0" />
          </font>
       </PasswordField>
-      <TextField fx:id="userfield" layoutX="162.0" layoutY="180.0" prefHeight="41.0" prefWidth="276.0" promptText="username" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );;">
+      <TextField fx:id="userfield" alignment="CENTER" layoutX="162.0" layoutY="180.0" prefHeight="41.0" prefWidth="276.0" promptText="username" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );;">
          <font>
             <Font name="Arial" size="15.0" />
          </font>
       </TextField>
-      <Label fx:id="errors" alignment="CENTER" layoutX="216.0" layoutY="357.0" text="Raffaele Apetino @ 2020" textFill="WHITE">
+      <Label fx:id="errors" alignment="CENTER" contentDisplay="CENTER" layoutX="216.0" layoutY="357.0" text="Raffaele Apetino @ 2020" textFill="WHITE">
          <font>
             <Font name="Arial" size="15.0" />
          </font>

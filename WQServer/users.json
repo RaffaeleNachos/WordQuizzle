@@ -10,7 +10,25 @@
     "username": "b",
     "points": -5,
     "stringfriends": [
+      "raffaele",
       "a"
     ]
+  },
+  "raffaele": {
+    "username": "raffaele",
+    "points": 0,
+    "stringfriends": [
+      "b"
+    ]
+  },
+  "x": {
+    "username": "x",
+    "points": 0,
+    "stringfriends": []
+  },
+  "n": {
+    "username": "n",
+    "points": 0,
+    "stringfriends": []
   }
 }

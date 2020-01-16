@@ -19,6 +19,7 @@ import java.net.DatagramSocket;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -31,8 +32,8 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	
 	private static MessageDigest digest;
 	
-	private String ppath = "./passwords.json";
-	private String upath = "./users.json";
+	private static String ppath = "./passwords.json";
+	private static String upath = "./users.json";
 	
 	public WQDatabase(boolean exist) {
 		if (exist == false) {
@@ -96,10 +97,12 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	public synchronized int user_registration(String nickname, String password) throws RemoteException, NullPointerException{
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (password == null) throw new NullPointerException("Invalid password (NULL)");
+		if (nickname.equals("") || password.equals("")) return 9;
 		if (passwords.containsKey(nickname)) return 11;
 		if (passwords.put(nickname, hashMyPass(nickname + password)) == null) {
 			if (!users.containsKey(nickname)) {
 				users.put(nickname, new User(nickname));
+				//aggiorno entrambi i file (db utenti e password) con la nuova registrazione
 				updatePJSON();
 				updateUJSON();
 				return 10;
@@ -178,9 +181,21 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		}
 	}
 	
+	public int show_points(String nickname) {
+		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
+		if (users.containsKey(nickname)) {
+			return users.get(nickname).points;
+		} else {
+			return -1;
+		}
+	}
+	
 	public JSONArray friend_list(String nickname) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {
+			//nel caso della sola lista di amici (senza i punti) si potrebbe pensare di potersi risparmiare una iterazione sulla lista 
+			//di amici poichè essa è già pronta sul file, ma il parsing del file, la ricerca della chiave user e la restituzione del JSONArray è 
+			//sicuramente più costoso di una iterazione O(n) sulla lista di amici
 			Iterator<String> itr = users.get(nickname).getFriends().iterator();
 			JSONArray lista = new JSONArray();
 			while(itr.hasNext()) {
@@ -197,9 +212,12 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 			Iterator<String> itr = users.get(nickname).getFriends().iterator();
 			ArrayList<User> realRank = new ArrayList<>();
 			while(itr.hasNext()) {
+				//costo costante sulla get dell'istanza del vero utente nella struttura dati
 				realRank.add(users.get(itr.next()));
 			}
+			//utilizza il compareTo definito nella classe User (ordina secondo il punteggio)
 			Collections.sort(realRank);
+			//a questo punto mi costruisco il JSON da inviare
 			Iterator<User> iter = realRank.iterator();
 			JSONArray lista = new JSONArray();
 			while(iter.hasNext()) {
@@ -212,15 +230,6 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 			return lista;
 		}
 		return null;
-	}
-	
-	public int show_points(String nickname) {
-		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
-		if (users.containsKey(nickname)) {
-			return users.get(nickname).points;
-		} else {
-			return -1;
-		}
 	}
 	
 	public User getUser(String nickname) {

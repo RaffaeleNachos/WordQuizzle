@@ -25,48 +25,49 @@ public class WQTask implements Runnable{
 		DatagramSocket clientsocket = null;
 		try {
 			clientsocket = new DatagramSocket();
-		} catch (SocketException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (SocketException e) {
+			e.printStackTrace();
 		}
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			String line = reader.readLine();
 			System.out.println("Server ho letto " + line);
+			//tokenizzo la stringa ricevuta dal client
 			String[] tokens = line.split("\\s+");
 			while(!tokens[0].equals("LOGOUT")) {
-				if (tokens[0].equals("LOGIN")) {
+				if (tokens[0].equals("LOGIN") && tokens.length == 5) {
 					writer.write(Integer.toString(db.user_login(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4]))));
 					writer.newLine(); 
 					writer.flush();
 				}
-				if (tokens[0].equals("ADD")) {
+				else if (tokens[0].equals("ADD") && tokens.length == 3) {
 					writer.write(Integer.toString(db.add_friend(tokens[1], tokens[2])));
-					writer.newLine(); 
+					writer.newLine();
 					writer.flush();
 				}
-				if (tokens[0].equals("REMOVE")) {
+				else if (tokens[0].equals("REMOVE") && tokens.length == 3) {
 					writer.write(Integer.toString(db.remove_friend(tokens[1], tokens[2])));
 					writer.newLine(); 
 					writer.flush();
 				}
-				if (tokens[0].equals("POINTS")) {
+				else if (tokens[0].equals("POINTS") && tokens.length == 2) {
 					writer.write(Integer.toString(db.show_points(tokens[1])));
 					writer.newLine(); 
 					writer.flush();
 				}
-				if (tokens[0].equals("LIST")) {
+				else if (tokens[0].equals("LIST") && tokens.length == 2) {
 					writer.write(db.friend_list(tokens[1]).toJSONString());
 					writer.newLine();
 					writer.flush();
 				}
-				if (tokens[0].equals("RANK")) {
+				else if (tokens[0].equals("RANK") && tokens.length == 2) {
 					writer.write(db.show_ranking(tokens[1]).toJSONString());
 					writer.newLine();
 					writer.flush();
 				}
-				if (tokens[0].equals("CHALL")) {
+				//need to be checked
+				else if (tokens[0].equals("CHALL")) {
 					int TCPport = (int) ((Math.random() * ((65535 - 1024) + 1)) + 1024);
 					WQChallenge wqc = new WQChallenge(TCPport, db);
 					wqc.start();
@@ -106,6 +107,11 @@ public class WQTask implements Runnable{
 							System.out.println("killed");
 						}
 					}
+				}
+				else {
+					writer.write(Integer.toString(9));
+					writer.newLine(); 
+					writer.flush();
 				}
 				line = reader.readLine();
 				System.out.println("Server ho letto " + line);

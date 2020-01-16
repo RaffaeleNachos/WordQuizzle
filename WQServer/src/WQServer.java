@@ -15,11 +15,13 @@ public class WQServer {
 	
 	private static ThreadPoolExecutor executor;
 	private static LinkedBlockingQueue<Runnable> myQueue;
+	private static String passwordPath = "./passwords.json";
+	private static String userPath = "./users.json";
 
 	public static void main(String[] args) {
 		System.out.println("Server Starting...");
 		WQDatabase db = null;
-		if (!Files.exists(Paths.get("./passwords.json")) || !Files.exists(Paths.get("./users.json"))) {
+		if (!Files.exists(Paths.get(passwordPath)) || !Files.exists(Paths.get(userPath))) {
 			db = new WQDatabase(false);
 		} 
 		else {
@@ -45,12 +47,12 @@ public class WQServer {
 			serverSocket = new ServerSocket(6790);
 			while(true){
 				Socket socket = serverSocket.accept();
+				//creo nuovo thread che si occuperà di un singolo client
 				WQTask t = new WQTask(db,socket);
 				executor.execute(t);
 			}
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 	}

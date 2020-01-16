@@ -7,26 +7,24 @@ import java.net.SocketException;
 import javafx.application.Platform;
 
 public class WQNotify extends Thread{
-	
-	private int port;
+
 	private MainViewController masterContr;
 	private DatagramSocket mys;
 	private InetAddress destia;
 	private int destport;
 	private WQClient client_master;
 	
-	public WQNotify (int port, WQClient client_master) {
-		this.port = port;
-		this.client_master = client_master;		
+	public WQNotify (WQClient client_master, DatagramSocket mys) {
+		this.client_master = client_master;	
+		this.mys = mys;
 	}
 	
 	public void run() {
 		System.out.println("Thread Notify attivo");
 		try {
-			mys= new DatagramSocket(port);
 			byte[] buffer = new byte[1024];
 			DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
-			while (true) {
+			while (!Thread.currentThread().isInterrupted()) {
 				System.out.println("sono in attesa UDP");
 				mys.receive(receivedPacket);
 				String byteToString = new String(receivedPacket.getData(), 0, receivedPacket.getLength());
@@ -81,12 +79,12 @@ public class WQNotify extends Thread{
 				}
 			}
 		} catch (SocketException e) {
-			// TODO Auto-generated catch block
+			System.out.println("la socket è stata chiusa, termino il thread");
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println("Thread Notify Shutdown");
 	}
 	
 	public void setController (MainViewController contr) {

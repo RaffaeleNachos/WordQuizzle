@@ -57,6 +57,10 @@ public class MainViewController {
 		points.setText(Integer.toString(num_points));
 	}
 	
+	public void setUsername(String g_username) {
+		username.setText(g_username);
+	}
+	
 	public void setNotifyTabVisible(String nick) {
 		chnotificationlabel.setText(nick);
 		notifyPane.setVisible(true);
@@ -64,10 +68,6 @@ public class MainViewController {
 	
 	public void setNotifyTabInvisible() {
 		notifyPane.setVisible(false);
-	}
-	
-	public void setUsername(String g_username) {
-		username.setText(g_username);
 	}
 	
 	public void populateList(ArrayList<String> people) {
@@ -87,7 +87,6 @@ public class MainViewController {
 		err = client_master.add_handler(nickChall.getText());
 		ch_error.setText(WQClient.codetoString(err));
 		populateList(client_master.list_handler());
-		//if (err==16) client_master.gotoLogin();
 	}
 	
 	public void delbtnAction(ActionEvent event) {
@@ -95,7 +94,6 @@ public class MainViewController {
 		err = client_master.del_handler(nickChall.getText());
 		ch_error.setText(WQClient.codetoString(err));
 		populateList(client_master.list_handler());
-		//if (err==16) client_master.gotoLogin();
 	}
 	
 	public void togglebtnAction(ActionEvent event) {

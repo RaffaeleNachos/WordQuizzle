@@ -28,8 +28,8 @@ public class RegisterLoginController {
 	@FXML
 	private void loginbtnAction(ActionEvent event) {
 		int err;
+		//chiama le funzioni handler definite nella classe WQClient associata al client che sta gestendo
 		err = client_master.login_handler(userfield.getText(), passfield.getText());
-		System.out.println(WQClient.codetoString(err));
 		errors.setText(WQClient.codetoString(err));
 		if (err==12) client_master.gotoMain();
 	}
