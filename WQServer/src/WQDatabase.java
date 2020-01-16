@@ -9,6 +9,8 @@ import java.rmi.RemoteException;
 import java.rmi.server.RemoteServer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.lang.reflect.Type;
@@ -17,12 +19,11 @@ import java.net.DatagramSocket;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+@SuppressWarnings("serial")
 public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	
 	private HashMap<String, String> passwords;
@@ -51,7 +52,8 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			passwords = (HashMap<String, String>) gson.fromJson(pjson, passwords.getClass());
+			Type typea = new TypeToken<HashMap<String, String>>(){}.getType();
+			passwords = gson.fromJson(pjson, typea);
 			
 			//users file
 			String ujson = null;
@@ -61,29 +63,8 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			Type type = new TypeToken<HashMap<String, User>>(){}.getType();
-	        users = gson.fromJson(ujson, type);
-	        //creo la lista di amicizie reali per ogni utente
-	        JSONParser parser = new JSONParser();
-	        Object obj = null;
-			try {
-				obj = parser.parse(ujson);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	        JSONObject jsonObject = (JSONObject) obj;
-	        Iterator<String> iterator = jsonObject.keySet().iterator();
-	        while(iterator.hasNext()) {
-	            String key = (String) iterator.next();
-	            JSONObject fr = (JSONObject) jsonObject.get(key);
-	            JSONArray list = (JSONArray) fr.get("stringfriends");
-	            //System.out.println(list);
-	            Iterator<String> itr = list.iterator();
-				while (itr.hasNext()) {
-					users.get(key).addFriend(users.get(itr.next()));
-				}
-	        }
+			Type typeb = new TypeToken<HashMap<String, User>>(){}.getType();
+	        users = gson.fromJson(ujson, typeb);
 		}
 	}
 	
@@ -160,10 +141,10 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		if (nickfriend == null) throw new NullPointerException("Invalid friend's nickname (NULL)");
 		if (users.containsKey(nickname)) {
 			if (users.containsKey(nickfriend)) {
-				if (users.get(nickname).addFriend(users.get(nickfriend)) == 0) {
+				if (users.get(nickname).addFriend(nickfriend) == 0) {
 					return 17;
 				};
-				if (users.get(nickfriend).addFriend(users.get(nickname)) == 0) {
+				if (users.get(nickfriend).addFriend(nickname) == 0) {
 					return 17;
 				};
 				updateUJSON();
@@ -181,10 +162,10 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		if (nickfriend == null) throw new NullPointerException("Invalid friend's nickname (NULL)");
 		if (users.containsKey(nickname)) {
 			if (users.containsKey(nickfriend)) {
-				if (users.get(nickname).removeFriend(users.get(nickfriend)) == 0) {
+				if (users.get(nickname).removeFriend(nickfriend) == 0) {
 					return 19;
 				};
-				if (users.get(nickfriend).removeFriend(users.get(nickname)) == 0) {
+				if (users.get(nickfriend).removeFriend(nickname) == 0) {
 					return 19;
 				};
 				updateUJSON();
@@ -213,11 +194,17 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	public JSONArray show_ranking(String nickname) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {
-			Iterator<User> itr = users.get(nickname).getOrderedFriends().iterator();
-			JSONArray lista = new JSONArray();
+			Iterator<String> itr = users.get(nickname).getFriends().iterator();
+			ArrayList<User> realRank = new ArrayList<>();
 			while(itr.hasNext()) {
+				realRank.add(users.get(itr.next()));
+			}
+			Collections.sort(realRank);
+			Iterator<User> iter = realRank.iterator();
+			JSONArray lista = new JSONArray();
+			while(iter.hasNext()) {
 				JSONObject usr = new JSONObject();
-				User x = itr.next();
+				User x = iter.next();
 				usr.put("username", x.username);
 				usr.put("points", x.points);
 				lista.add(usr);

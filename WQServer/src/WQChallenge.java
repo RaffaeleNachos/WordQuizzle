@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -12,6 +14,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -84,31 +87,7 @@ public class WQChallenge extends Thread{
 			//per ora sto in ascolto solo sulla key (della socket del server) che identifica la accept
 			selector = Selector.open(); 
 			serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-			
-			//traduzione k parole
-			for (int i = 0; i < selectedWords.size(); i++) {
-				URL url = new URL("https://api.mymemory.translated.net/get?q=" + selectedWords.get(i) + "&langpair=it|en");
-	            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-	            conn.setRequestMethod("GET");
-	            conn.setRequestProperty("Accept", "application/json");
-	            if (conn.getResponseCode() != 200) 
-	            {
-	                throw new RuntimeException("Failed, error code " + conn.getResponseCode());
-	            }
-	 
-	            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-	            String apiOutput = br.readLine();
-	            try {
-					JSONObject bigobj = (JSONObject) parser.parse(apiOutput);
-					JSONObject smallobj = (JSONObject) bigobj.get("responseData");
-					//toLowercase perchè spesso la traduzione ha delle lettere maiuscole e può dare problemi per il controllo di correttezza
-					translatedWords.add(i, (String) smallobj.get("translatedText").toString().toLowerCase());
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	            conn.disconnect();
-			}
+			translateWords();
 			System.out.println("Traduzioni: " + translatedWords.toString());
 		} catch (IOException ex) { 
 			ex.printStackTrace();
@@ -154,7 +133,7 @@ public class WQChallenge extends Thread{
 								myWord.setWord(selectedWords.get(myWord.getIndex()) + " " + perc);
 							} else {
 								System.out.println("mando chend");
-								myWord.setWord("CHEND");
+								myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords);
 								endusers.incrementAndGet();
 							}
 						}
@@ -212,7 +191,7 @@ public class WQChallenge extends Thread{
 							} else {
 								//tokenizzo la stringa di risposta e avvio un thread che mi controlla la correttezza della traduzione
 								String token[] = read.split("\\s+");
-								WQCheckWord wqcheck = new WQCheckWord(db, token[1], token[0], translatedWords.get(myWord.getIndex()));
+								WQCheckWord wqcheck = new WQCheckWord(db, token[1], token[0], translatedWords.get(myWord.getIndex()), myWord.stat);
 								wqcheck.start();
 								myWord.setWord(null);
 								myWord.incIndex();
@@ -243,14 +222,31 @@ public class WQChallenge extends Thread{
 		System.out.println("Challenge Thread Shutdown...");
 	}
 	
+	public class Statistics{
+		public int chPoints;
+		public int correctWords;
+		public int wrongWords;
+		public int notAnsweredWords;
+		
+		public Statistics() {
+			chPoints = 0;
+			correctWords = 0;
+			wrongWords = 0;
+			notAnsweredWords = 0;
+		}
+		
+	}
+	
 	public class WQWord {
 		
 		String word;
 		int numWord;
+		Statistics stat;
 		
 		public WQWord(String word, int numWord) {
 			this.word = word;
 			this.numWord = numWord;
+			this.stat = new Statistics();
 		}
 		
 		public String getWord() {
@@ -270,4 +266,32 @@ public class WQChallenge extends Thread{
 		}
 	}
 
+	//chiedere se conviene chiamare ogni volta il server delle API oppure tutto insieme
+	//nel mio caso ho un thread che si occupa del controllo della parola sarebbe meglio farlo direttamente in questo thread
+	public void translateWords() throws IOException {
+		//traduzione k parole
+		for (int i = 0; i < selectedWords.size(); i++) {
+			URL url = new URL("https://api.mymemory.translated.net/get?q=" + selectedWords.get(i) + "&langpair=it|en");
+            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/json");
+            if (conn.getResponseCode() != 200) 
+            {
+                throw new RuntimeException("Failed, error code " + conn.getResponseCode());
+            }
+ 
+            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+            String apiOutput = br.readLine();
+            try {
+				JSONObject bigobj = (JSONObject) parser.parse(apiOutput);
+				JSONObject smallobj = (JSONObject) bigobj.get("responseData");
+				//toLowercase perchè spesso la traduzione ha delle lettere maiuscole e può dare problemi per il controllo di correttezza
+				translatedWords.add(i, (String) smallobj.get("translatedText").toString().toLowerCase());
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            conn.disconnect();
+		}
+	}
 }

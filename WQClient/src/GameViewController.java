@@ -94,7 +94,7 @@ public class GameViewController {
     			progressBar.setProgress(Double.parseDouble(token[1]));
     		}
     		else {
-    			labelStatus.setText("Challenge ended. Your score will be updated soon!");
+    			labelStatus.setText("Challenge ended. Your score: " + token[1] + " Correct Words: " + token[2] + " Wrong Words: " + token[3]);
     			btnSend.setStyle("-fx-background-color: #DEDEE0");
 				btnSend.setDisable(true);
     		}
