@@ -104,18 +104,22 @@ public class MainViewController {
 		}
 	}
 	
+	//per lo sfidato nella tab delle notifiche accettazione
 	public void declinebtnAction(ActionEvent event) {
 		client_master.decline_handler();
 	}
 	
+	//per lo sfidato nella tab delle notifoiche accettazione
 	public void acceptbtnAction(ActionEvent event) {
 		client_master.accept_handler();
 	}
 	
+	//per lo sfidante nel main controller
 	public void challengebtnAction(ActionEvent event) {
 		int err;
 		err = client_master.chall_handler(nickChall.getText());
 		ch_error.setText(WQClient.codetoString(err));
+		//se la richiesta è inviata non permetto di inviarne un'altra fino a che non scada il timeout T1
 		if (err==21) {
 			btnChallenge.setStyle("-fx-background-color: #DEDEE0");
 			btnChallenge.setDisable(true);

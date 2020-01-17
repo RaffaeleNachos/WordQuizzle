@@ -13,6 +13,7 @@ public class WQTask implements Runnable{
 	
 	private WQDatabase db;
 	private Socket socket;
+	private DatagramSocket clientsocket;
 	
 	public WQTask(WQDatabase db, Socket socket) {
 		this.db=db;
@@ -22,7 +23,6 @@ public class WQTask implements Runnable{
 	@Override
 	public void run() {
 		System.out.println("Nuovo client eseguito da " + Thread.currentThread().getName());
-		DatagramSocket clientsocket = null;
 		try {
 			clientsocket = new DatagramSocket();
 		} catch (SocketException e) {
@@ -66,45 +66,55 @@ public class WQTask implements Runnable{
 					writer.newLine();
 					writer.flush();
 				}
-				//need to be checked
-				else if (tokens[0].equals("CHALL")) {
+				//sfidante
+				else if (tokens[0].equals("CHALL") && tokens.length == 3) {
+					//creo la randomicamente porta TCP per la sfida (thread con selector)
 					int TCPport = (int) ((Math.random() * ((65535 - 1024) + 1)) + 1024);
+					//faccio partire il thread della challenge, così da essere già pronto in caso di accettazione
 					WQChallenge wqc = new WQChallenge(TCPport, db);
 					wqc.start();
+					//chiamata al database che si occuperà di mandare sulla socket UDP delle notifiche la richiesta di sfida 
+					//il messaggio conterrà l'username dello sfidante e la porta TCP del server dove avverrà la sfida
 					int err = db.challenge(tokens[1], tokens[2], clientsocket, TCPport);
+					//se c'è stato qualche problema allora mi occupo di chiudere il thread della challenge e mandare il messaggio di errore al client su TCP
 					if (err!=21 && wqc.isAlive()) {
-						wqc.firealarm.incrementAndGet();
+						if (wqc.isAlive()) wqc.interrupt();
 						writer.write(Integer.toString(err));
 						writer.newLine();
 						writer.flush();
 					} else {
+						//altrimenti mando messaggio di richiesta inviata al client
 						writer.write(Integer.toString(err));
 						writer.newLine();
 						writer.flush();
 						byte[] buffer = new byte[1024];
 						DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
-						//TIMER T1 PER ACCETAZIONE SFIDA 30 secondi
+						//imposto TIMER T1 PER ACCETAZIONE SFIDA 30 secondi (se non mi arriva la risposta entro 30 secondi...
 						clientsocket.setSoTimeout(30000);
 						try {
 							clientsocket.receive(receivedPacket);
 						} catch (SocketTimeoutException e) {
-							//allo sfidante mando non accettata
+							//se dovesse scadere il timer T1
+							//allo sfidante mando "DECLINED"
 							db.challengedeclined(tokens[1], clientsocket);
+							//allo sfidato mando "TIMEOUT" per eliminare la notifica
+							db.timeout(tokens[2], clientsocket);
 							//unico metodo per fermare il thread bloccato sulla select
 							if (wqc.isAlive()) wqc.interrupt();
-							//allo sfidato mando timeout per eliminare la notifica
-							db.timeout(tokens[2], clientsocket);
 						}
+						//leggo il datagramma ricevuto
 						String byteToString = new String(receivedPacket.getData(), 0, receivedPacket.getLength());
 						String [] tokens2 = byteToString.split("\\s+");
-						System.out.println(byteToString);
+						//System.out.println("Server ho ricevuto tramite UDP: " + byteToString);
 						if (tokens2[0].equals("ACCEPT")) {
+							//mando allo sfidante la porta del server dove avverrà la sfida (al client dello sfidato l'ho inviata tempo precedente)
 							db.challengeaccepted(tokens[1], clientsocket, TCPport);
 						}
 						if (tokens2[0].equals("DECLINE")) {
+							//ho ricevuto dallo sfidato decline quindi invio allo sfidante DECLINED
 							db.challengedeclined(tokens[1], clientsocket);
-							if (wqc.isAlive()) wqc.firealarm.incrementAndGet();
-							System.out.println("killed");
+							//mi occupo della chiusura del thread della challenge preparato
+							if (wqc.isAlive()) wqc.interrupt();
 						}
 					}
 				}

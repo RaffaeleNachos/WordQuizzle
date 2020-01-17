@@ -36,7 +36,9 @@ public class WQClient extends Application{
 	private BufferedReader reader;
 	public String user;
 	private JSONParser parser = new JSONParser();
+	//porta per le notifiche
 	private int UDPport;
+	//porta per la sfida
 	private int TCPport;
 	private WQNotify thnotify;
 	private RegisterLoginController logincontroller;
@@ -303,16 +305,22 @@ public class WQClient extends Application{
 	}
 	
 	public void accept_handler() {
+		//UDP accettazione
 		thnotify.accept();
+		//setto invisibile la tab notifiche
 		maincontroller.setNotifyTabInvisible();
+		//mando la GUI in modalità GIOCO per lo sfidato
 		gotoGame();
 	}
 	
 	public void decline_handler() {
+		//utilizzo UDP per declinare l'offerta di sfida
 		thnotify.decline();
+		//setto invisibile la tab notifiche
 		maincontroller.setNotifyTabInvisible();
 	}
 	
+	//setta la porta TCP per la sfida
 	public void setTCPport(int port) {
 		TCPport = port;
 	}

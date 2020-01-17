@@ -3,17 +3,17 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 public class User implements Comparable<User>{
+	//transient serve a Gson per non serializzare la variabile
 	public transient boolean online = false;
 	public String username;
-	public int points = 0;
-	//private transient ArrayList<User> friends;
+	public int points;
 	private ArrayList<String> stringfriends;
 	private transient InetAddress ia;
 	private transient int UDPport;
 	
 	public User(String username) {
 		this.username = username;
-		//friends = new ArrayList<>();
+		this.points = 0;
 		stringfriends = new ArrayList<>();
 	}
 	
@@ -25,6 +25,11 @@ public class User implements Comparable<User>{
 		}
 	}
 	
+	
+	public InetAddress getIA() {
+		return ia;
+	}
+	
 	public void setPort(int p) {
 		UDPport = p;
 	}
@@ -33,26 +38,16 @@ public class User implements Comparable<User>{
 		return UDPport;
 	}
 	
-	public InetAddress getIA() {
-		return ia;
-	}
-	
 	public int addFriend(String friend) {
-		//TODO aggiungere se stesso non si può fare
-		//necessario nel caso in cui il server deve ripartire dai dati su file json
 		if (stringfriends.contains(friend) || friend.equals(username)) return 0;
-		else {
-			stringfriends.add(friend);
-			return 1;
-		}
+		stringfriends.add(friend);
+		return 1;
 	}
 	
 	public int removeFriend(String friend) {
 		if (!stringfriends.contains(friend)) return 0;
-		else {
-			stringfriends.remove(friend);
-			return 1;
-		}
+		stringfriends.remove(friend);
+		return 1;
 	}
 	
 	public ArrayList<String> getFriends(){
@@ -61,8 +56,8 @@ public class User implements Comparable<User>{
 	
 	@Override
     public int compareTo(User u) {
-        int comparePoints= u.points;
-        return comparePoints-this.points;
+        int comparePoints = u.points;
+        return comparePoints - this.points;
     }
 	
 }

@@ -89,7 +89,7 @@ public class WQChallenge extends Thread{
 			//per ora sto in ascolto solo sulla key (della socket del server) che identifica la accept
 			selector = Selector.open(); 
 			serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-			translateWords();
+			//translateWords();
 			System.out.println("Traduzioni: " + translatedWords.toString());
 		} catch (IOException ex) { 
 			ex.printStackTrace();

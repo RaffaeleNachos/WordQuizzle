@@ -232,6 +232,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		return null;
 	}
 	
+	//metodo che mi restituisce una istanza di user, mi serve per permettere al thread della challenge di aggiungere punti al giocatore
 	public User getUser(String nickname) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {
@@ -241,24 +242,26 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		}
 	}
 	
+	//invia su UDP allo sfidato CH A B
 	public int challenge(String nickname, String nickfriend, DatagramSocket s, int chport) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (nickfriend == null) throw new NullPointerException("Invalid friend's nickname (NULL)");
 		if (users.containsKey(nickname)) {
 			if (users.containsKey(nickfriend)) {
 				if (users.get(nickname).getFriends().contains(nickfriend) == true) {
+					//manda la richiesta solo se è online
 					if(users.get(nickfriend).online == true) {
 						//UDP
 						String tmp = "CH " + nickname + " " + chport;
 						byte[] buffer=tmp.getBytes();
+						//essendo online siamo sicuri che l'indirizzo e porta dell'amico sia corretto quindi li prendo dal database
 						DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickfriend).getIA(), users.get(nickfriend).getPort());
 						try {
 							s.send(mypacket);
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						System.out.println("ho inviato " + tmp);
+						//System.out.println("ho inviato " + tmp);
 						return 21;
 					}
 					else return 22;
@@ -273,31 +276,30 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		}
 	}
 	
-	//inviati allo sfidante
-	public void challengeaccepted(String nickfriend, DatagramSocket s, int chport) {
+	//inviati allo sfidante - sfida accettata
+	public void challengeaccepted(String nickname, DatagramSocket s, int chport) {
 		String tmp = "ACCEPTED " + chport;
-		byte[] buffer=tmp.getBytes();
-		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickfriend).getIA(), users.get(nickfriend).getPort());
+		byte[] buffer = tmp.getBytes();
+		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickname).getIA(), users.get(nickname).getPort());
 		try {
 			s.send(mypacket);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("ho inviato " + tmp);		
+		//System.out.println("ho inviato " + tmp);
 	}
 	
-	public void challengedeclined(String nickfriend, DatagramSocket s) {
+	//nel caso in cui la sfida non sia accetatta è scaduto il timer avviso il client dello sfidante
+	public void challengedeclined(String nickname, DatagramSocket s) {
 		String tmp = "DECLINED";
-		byte[] buffer=tmp.getBytes();
-		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickfriend).getIA(), users.get(nickfriend).getPort());
+		byte[] buffer = tmp.getBytes();
+		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickname).getIA(), users.get(nickname).getPort());
 		try {
 			s.send(mypacket);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("ho inviato " + tmp);		
+		//System.out.println("ho inviato " + tmp);
 	}
 	
 	//inviati allo sfidato
@@ -308,12 +310,12 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		try {
 			s.send(mypacket);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("ho inviato " + tmp);		
+		//System.out.println("ho inviato " + tmp);		
 	}
 	
+	//metodo che si occupa di hashare le password tramite l'algoritmo di hashing one-way SHA-256
 	private static String hashMyPass(String password) {
 		byte[] hash = null;
 		try {
@@ -336,6 +338,8 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		else return null;
 	}
 	
+	
+	//metodo che si occuopa di aggiornare il JSON delle password (database delle password + nickname)
 	public void updatePJSON() {
 		Gson gson = new Gson();
 		String passjson = gson.toJson(passwords);
@@ -360,6 +364,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		}
 	}
 	
+	//metodo che si occupa di aggiornare il JSON degli utenti (database dei dati)
 	private void updateUJSON() {
 		Gson gson = new Gson();
 		String userjson = gson.toJson(users);
