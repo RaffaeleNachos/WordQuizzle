@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.channels.SelectionKey;
 import java.nio.file.Paths;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -44,6 +45,7 @@ public class WQClient extends Application{
 	private RegisterLoginController logincontroller;
 	private MainViewController maincontroller;
 	private GameViewController gamecontroller;
+	private static String serverIA = "localhost";
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -116,6 +118,7 @@ public class WQClient extends Application{
 			//setto controller per il gioco
 			gamecontroller = loader.getController();
             gamecontroller.setClient(this);
+            //passo come parametro la porta della sfida e l'indirizzo del server
             gamecontroller.setSocket(TCPport, c_socket.getInetAddress());
 			Scene scene = stage.getScene();
 			if (scene == null) {
@@ -125,10 +128,7 @@ public class WQClient extends Application{
         		stage.getScene().setRoot(layoutmain);
         	}
 			stage.sizeToScene();
-			//parte il timer del gioco appena viene caricata la gui di gioco
-			new ChTimer(60, gamecontroller);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -155,7 +155,7 @@ public class WQClient extends Application{
 	public int login_handler(String username, String password) {
 		int err = 0;
 		try {
-			c_socket = new Socket("localhost", 6790);
+			c_socket = new Socket(serverIA, 6790);
 			//creo porta e processo per le notifiche
 			UDPport = (int) ((Math.random() * ((65535 - 1024) + 1)) + 1024);
 			//scrivo tramite tcp le informazioni di login

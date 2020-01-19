@@ -1,10 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -14,7 +11,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,53 +24,57 @@ import org.json.simple.parser.ParseException;
 
 public class WQChallenge extends Thread{
 	
+	//porta del server a cui si collegheranno i due client
 	private int port;
 	private Selector selector;
 	private ServerSocket serverSocket;
 	private ServerSocketChannel serverChannel;
+	//array per le parole in italiano contenute in un file json
 	private JSONArray jarr;
+	private JSONParser parser;
 	private ArrayList<String> selectedWords;
 	private ArrayList<String> translatedWords;
+	//numero di parole
 	private static int K = 5;
+	//riferimento al database per poter aggiornare i punti
 	private WQDatabase db;
-	private JSONParser parser;
+	//variabile atomica in memoria principale che si occupa di capire quando entrambi i client hanno finito
 	private volatile AtomicInteger endusers;
-	public volatile AtomicInteger firealarm;
+	//punti da assegnare
 	private static int correctPoint = 3;
 	private static int wrongPoint = -1;
+	//dove mi salvo le chiavi per il recap finale
+	private ArrayList<SelectionKey> finalkeys;
 	
 	public WQChallenge(int port, WQDatabase db) {
 		this.port = port;
 		this.db = db;
+		finalkeys = new ArrayList<>();
 		endusers = new AtomicInteger(0);
-		firealarm = new AtomicInteger(0);
 		selectedWords = new ArrayList<>();
-		translatedWords = new ArrayList<>();
 		parser = new JSONParser();
-		String strjson = null;
-		try {
-			strjson = WQDatabase.getFileStringy("./words.json");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		JSONParser parser = new JSONParser();
-		try {
-			jarr = (JSONArray) parser.parse(strjson);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		for (int i = 0; i < K; i++) {
-			//System.out.println(jarr.toString());
-			//System.out.println("size: " + (int) (Math.random() * ((jarr.size()))) + " prima parola " + (String) jarr.get(0) + " parola scelta " + (String) jarr.get((int) (Math.random() * ((jarr.size())))));
-			selectedWords.add((String) jarr.get((int) ((Math.random() * ((jarr.size()))))));
-		}
 	}
 	
 	public void run() {
+		String strjson = null;
 		try {
-			System.out.println("Parole: " + selectedWords.toString());
+			//leggo il file json delle parole
+			strjson = WQDatabase.getFileStringy("./words.json");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			jarr = (JSONArray) parser.parse(strjson);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		//scelgo le K parole
+		for (int i = 0; i < K; i++) {
+			//System.out.println("size: " + (int) (Math.random() * ((jarr.size()))) + " prima parola " + (String) jarr.get(0) + " parola scelta " + (String) jarr.get((int) (Math.random() * ((jarr.size())))));
+			selectedWords.add((String) jarr.get((int) ((Math.random() * ((jarr.size()))))));
+		}
+		System.out.println("Parole italiane scelte: " + selectedWords.toString());
+		try {
 			//creo ServerSocketChannel per poterlo settare in modalità non bloccante
 			//il SocketChannel è creato implicitamente
 			serverChannel = ServerSocketChannel.open();
@@ -89,15 +89,12 @@ public class WQChallenge extends Thread{
 			//per ora sto in ascolto solo sulla key (della socket del server) che identifica la accept
 			selector = Selector.open(); 
 			serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-			//translateWords();
-			System.out.println("Traduzioni: " + translatedWords.toString());
 		} catch (IOException ex) { 
 			ex.printStackTrace();
 		}
-		while (firealarm.get() == 0 && endusers.get() != 2 && !Thread.currentThread().isInterrupted()) { 
+		//finchè entrambi non hanno finito o il thread non è interrotto
+		while (endusers.get() != 2 && !Thread.currentThread().isInterrupted()) { 
 			try {
-				//System.out.println(selector.keys());
-				//System.out.println(selector.selectedKeys());
 				System.out.println("Server | Aspetto sulla select");
 				selector.select();
 			} catch (IOException ex) {
@@ -121,21 +118,43 @@ public class WQChallenge extends Thread{
 						client.configureBlocking(false);
 						//creo una nuova chiave associata alla socket client
 						SelectionKey clientkey = client.register(selector, SelectionKey.OP_WRITE, new WQWord(null, 0));
+						finalkeys.add(clientkey);
+						//appena qualcuno si collega mi occupo di interrogare le API
+						if (translatedWords == null) {
+							translatedWords = new ArrayList<>();
+							translateWords();
+							System.out.println("Traduzioni: " + translatedWords.toString());
+						}
 					}
 					else if (key.isWritable()) {
 						System.out.println("Server | pronta una chiave in scrittura");
 						SocketChannel client = (SocketChannel) key.channel();
 						WQWord myWord = (WQWord) key.attachment();
+						//se la parola è null vuol dire che è stata scritta tutta e se ne può inviare una nuova
 						if (myWord.getWord() == null) {
 							//mando nuova parola e double che indica la percentuale della progressbar da settare
-							if (myWord.getIndex() < K) {
-								//TODO aggiungere la parola iniziale e non partire da zero!
-								double perc = ((double) myWord.getIndex() / (double) K);
+							//caso in cui entrambi i giocatori stanno ancora giocando
+							if (myWord.getIndex() < K && endusers.get() != 1) {
+								//percentuale che invia il client al server per la progressbar
+								double perc = (double) myWord.getIndex() * (double) ( 1.0 / (double) (K - 1));
 								System.out.println(perc);
+								//metto la parola in italiano seguita dalla percentuale da assegnare alla progressbar
 								myWord.setWord(selectedWords.get(myWord.getIndex()) + " " + perc);
-							} else {
-								System.out.println("mando chend");
-								myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords);
+							}
+							//nel caso in cui uno dei due termina (enduser è 1) oppure le parole sono terminate
+							else {
+								//System.out.println("mando chend");
+								//recap finale per inviare le statistiche finali + hai vinto/hai perso
+								WQWord A = (WQWord) finalkeys.get(0).attachment();
+								WQWord B = (WQWord) finalkeys.get(1).attachment();
+								if (A!=null) System.out.println(A.toString());
+								if (B!=null) System.out.println(B.toString());
+								if (A.stat.chPoints == B.stat.chPoints) 
+									myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " DRAW");
+								if (A.stat.chPoints > B.stat.chPoints && myWord.stat.username.equals(A.stat.username)) 
+									myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " WIN");
+								else 
+									myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " LOSE");
 								endusers.incrementAndGet();
 							}
 						}
@@ -159,6 +178,7 @@ public class WQChallenge extends Thread{
 							System.out.println("Server | scrivo: " + bWrite + " bytes");
 							//la flip server per la decodifica
 							end.flip();
+							//setto la restante parola e non cambio interesse della chiave
 							myWord.setWord(StandardCharsets.UTF_8.decode(end).toString());
 							key.attach(myWord);
 						}
@@ -191,9 +211,14 @@ public class WQChallenge extends Thread{
 								key.cancel();
 								key.channel().close();
 							} else {
-								//tokenizzo la stringa di risposta e avvio un thread che mi controlla la correttezza della traduzione
+								//tokenizzo la stringa di risposta e controllo la correttezza della traduzione
 								String token[] = read.split("\\s+");
-								checkWords(token[1], token[0], translatedWords.get(myWord.getIndex()), myWord.stat);
+								//se è la prima volta che manda la parola mi salvo l'username nell'oggetto statistiche (associato alla chiave)
+								//per poter gestire la classifica finale
+								if (myWord.stat.username == null) myWord.stat.username = token[0];
+								//parolainglese - username - parolaitaliana - classe per le statistiche finali
+								//conto il punteggio solo se l'altro utente non ha finito
+								if (endusers.get()!=1) checkWords(token[1], token[0], translatedWords.get(myWord.getIndex()), myWord.stat);
 								myWord.setWord(null);
 								myWord.incIndex();
 								key.attach(myWord);
@@ -224,6 +249,7 @@ public class WQChallenge extends Thread{
 	}
 	
 	public class Statistics{
+		public String username;
 		public int chPoints;
 		public int correctWords;
 		public int wrongWords;
@@ -234,6 +260,7 @@ public class WQChallenge extends Thread{
 			correctWords = 0;
 			wrongWords = 0;
 			notAnsweredWords = 0;
+			username = null;
 		}
 		
 	}

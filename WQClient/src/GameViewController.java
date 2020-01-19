@@ -27,6 +27,8 @@ public class GameViewController {
 	private ProgressBar progressBar;
 	@FXML
 	public Label labelStatus;
+	@FXML
+	public Label labelTimeOver;
 	
 	
 	private WQClient client_master;
@@ -52,21 +54,22 @@ public class GameViewController {
 	}
 	
 	public void sendbtnAction(ActionEvent event) {
-		//TODO check che abbia scritto meno di 512 caratteri! prendo la sottostringa
-		String tosend = client_master.user + " " + engwordfield.getText();
-		byteBuffer = ByteBuffer.wrap(tosend.getBytes());
-		try {
-	    	while (byteBuffer.hasRemaining()) {
-	    		System.out.println("Client | scrivo: " + socketChannel.write(byteBuffer) + " bytes");
-	    	}
-	    	byteBuffer.clear();
-	    	byteBuffer.flip();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		//controllo che la textfield non sia vuota
+		if (!engwordfield.getText().isEmpty()) {
+			String tosend = client_master.user + " " + engwordfield.getText();
+			byteBuffer = ByteBuffer.wrap(tosend.getBytes());
+			try {
+		    	while (byteBuffer.hasRemaining()) {
+		    		System.out.println("Client | scrivo: " + socketChannel.write(byteBuffer) + " bytes");
+		    	}
+		    	byteBuffer.clear();
+		    	byteBuffer.flip();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			engwordfield.clear();
+			readStatus();
 		}
-		engwordfield.clear();
-		readStatus();
 	}
 	
 	public void readStatus() {
@@ -89,22 +92,27 @@ public class GameViewController {
         	}
     		byteBuffer.flip();
     		String token[] = tmp.split("\\s+");
-    		if (!token[0].equals("CHEND")) {
-    			itawordlabel.setText(token[0]);
-    			progressBar.setProgress(Double.parseDouble(token[1]));
-    		}
-    		else {
-    			labelStatus.setText("Challenge ended. Your score: " + token[1] + " Correct Words: " + token[2] + " Wrong Words: " + token[3]);
+    		if (token[0].equals("CHEND") && token.length==5) {
+    			labelStatus.setText("CHALLENGE ENDS!. Your score: " + token[1] + " Correct Words: " + token[2] + " Wrong Words: " + token[3] + "  " + token[4]);
     			btnSend.setStyle("-fx-background-color: #DEDEE0");
 				btnSend.setDisable(true);
     		}
+    		else {
+    			//se ho ricevuto la prima parola parte il timer
+    			if (Double.parseDouble(token[1]) == 0) {
+    				System.out.println("Timer sfida partito");
+    				new ChTimer(60, this);
+    			}
+    			itawordlabel.setText(token[0]);
+    			progressBar.setProgress(Double.parseDouble(token[1]));
+    		}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
 	public void exitbtnAction(ActionEvent event) {
+		//nel caso in cui si cliccasse il tasto exit per uscire dalla challenge avviso il server
 		String tosend = "CHEXITED";
 		byteBuffer = ByteBuffer.wrap(tosend.getBytes());
 		try {
@@ -114,9 +122,9 @@ public class GameViewController {
 	    	byteBuffer.clear();
 	    	byteBuffer.flip();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		//torno al main screen senza sapere l'esito della sfida (ma i punti si aggiornano comunque)
 		client_master.gotoMain();
 	}
 }

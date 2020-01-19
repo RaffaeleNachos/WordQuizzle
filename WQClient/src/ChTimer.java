@@ -2,6 +2,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javafx.application.Platform;
+import javafx.scene.effect.GaussianBlur;
 
 public class ChTimer{
 	private Timer timer;
@@ -20,8 +21,9 @@ public class ChTimer{
 				@Override
 	            public void run() {
 					masterContr.btnSend.setStyle("-fx-background-color: #DEDEE0");
+					masterContr.btnSend.setEffect(new GaussianBlur());
 					masterContr.btnSend.setDisable(true);
-					masterContr.labelStatus.setText("Time is OVER!");
+					masterContr.labelTimeOver.setVisible(true);
 	            }
 	          });
 		}

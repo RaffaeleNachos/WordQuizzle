@@ -17,7 +17,7 @@
       <AnchorPane prefHeight="106.0" prefWidth="600.0" style="-fx-background-color: #213862;" BorderPane.alignment="CENTER">
          <children>
             <ProgressBar fx:id="progressBar" layoutX="25.0" layoutY="60.0" prefHeight="20.0" prefWidth="419.0" progress="0.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="150.0" />
-            <Label fx:id="labelStatus" alignment="CENTER" contentDisplay="CENTER" layoutX="50.0" layoutY="23.0" text="Status..." textFill="WHITE" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
+            <Label fx:id="labelStatus" alignment="CENTER" contentDisplay="CENTER" layoutX="50.0" layoutY="23.0" text="Status:" textFill="WHITE" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0">
                <font>
                   <Font name="Arial" size="15.0" />
                </font>
@@ -43,7 +43,7 @@
                         <DropShadow />
                      </effect>
                   </ImageView>
-                  <Label fx:id="itawordlabel" alignment="CENTER" contentDisplay="CENTER" layoutX="25.0" layoutY="200.0" prefHeight="41.0" prefWidth="246.0" text="parola" textAlignment="CENTER" textFill="WHITE" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="170.0">
+                  <Label fx:id="itawordlabel" alignment="CENTER" contentDisplay="CENTER" layoutX="25.0" layoutY="200.0" prefHeight="41.0" prefWidth="246.0" text="..." textAlignment="CENTER" textFill="WHITE" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="170.0">
                      <font>
                         <Font name="Arial" size="15.0" />
                      </font>
@@ -70,6 +70,11 @@
                         <DropShadow />
                      </effect>
                   </Button>
+                  <Label fx:id="labelTimeOver" alignment="CENTER" contentDisplay="CENTER" layoutX="76.0" layoutY="228.0" prefHeight="41.0" prefWidth="143.0" rotate="-25.0" text="Time is OVER!" textAlignment="CENTER" textFill="WHITE" visible="false" AnchorPane.leftAnchor="76.0" AnchorPane.rightAnchor="76.0">
+                     <font>
+                        <Font name="Arial" size="15.0" />
+                     </font>
+                  </Label>
                </children>
             </AnchorPane>
         </items>
