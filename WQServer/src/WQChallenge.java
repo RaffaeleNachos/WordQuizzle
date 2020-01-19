@@ -147,14 +147,21 @@ public class WQChallenge extends Thread{
 								//recap finale per inviare le statistiche finali + hai vinto/hai perso
 								WQWord A = (WQWord) finalkeys.get(0).attachment();
 								WQWord B = (WQWord) finalkeys.get(1).attachment();
-								if (A!=null) System.out.println(A.toString());
-								if (B!=null) System.out.println(B.toString());
-								if (A.stat.chPoints == B.stat.chPoints) 
+								if (A!=null) System.out.println(A.stat.username);
+								if (B!=null) System.out.println(B.stat.username);
+								//se i punteggi sono uguali parità
+								if (A.stat.chPoints == B.stat.chPoints) {
 									myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " DRAW");
-								if (A.stat.chPoints > B.stat.chPoints && myWord.stat.username.equals(A.stat.username)) 
+								}
+								else if (A.stat.chPoints > B.stat.chPoints && myWord.stat.username.equals(A.stat.username)) {
+									System.out.println("ha vinto " + A.stat.username + " con punti " + A.stat.chPoints + " contro " + B.stat.username + " con punti " + B.stat.chPoints);
 									myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " WIN");
-								else 
-									myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " LOSE");
+								}
+								else if (B.stat.chPoints > A.stat.chPoints && myWord.stat.username.equals(B.stat.username)) {
+									System.out.println("ha vinto " + B.stat.username + " con punti " + B.stat.chPoints + " contro " + A.stat.username + " con punti " + A.stat.chPoints);
+									myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " WIN");
+								}
+								else myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " LOSE");
 								endusers.incrementAndGet();
 							}
 						}

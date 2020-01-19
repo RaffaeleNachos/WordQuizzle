@@ -93,7 +93,7 @@ public class GameViewController {
     		byteBuffer.flip();
     		String token[] = tmp.split("\\s+");
     		if (token[0].equals("CHEND") && token.length==5) {
-    			labelStatus.setText("CHALLENGE ENDS!. Your score: " + token[1] + " Correct Words: " + token[2] + " Wrong Words: " + token[3] + "  " + token[4]);
+    			labelStatus.setText("CHALLENGE ENDS!. Your score: " + token[1] + " Correct Words: " + token[2] + " Wrong Words: " + token[3] + " | " + token[4]);
     			btnSend.setStyle("-fx-background-color: #DEDEE0");
 				btnSend.setDisable(true);
     		}
