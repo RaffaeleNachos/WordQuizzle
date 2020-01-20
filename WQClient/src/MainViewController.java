@@ -61,6 +61,7 @@ public class MainViewController {
 		username.setText(g_username);
 	}
 	
+	//rendono visibile ed invisibile il contenuto della tab delle notifioche 
 	public void setNotifyTabVisible(String nick) {
 		chnotificationlabel.setText(nick);
 		notifyPane.setVisible(true);
@@ -70,6 +71,7 @@ public class MainViewController {
 		notifyPane.setVisible(false);
 	}
 	
+	//popola la listview della GUI
 	public void populateList(ArrayList<String> people) {
 		ObservableList<String> items = FXCollections.observableArrayList(people);
 		listview.setItems(items);

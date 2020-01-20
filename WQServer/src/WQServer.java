@@ -40,7 +40,8 @@ public class WQServer {
 			e.printStackTrace();
 		}
 		myQueue = new LinkedBlockingQueue<Runnable>();
-		executor = new ThreadPoolExecutor(20, 50, 60L, TimeUnit.MILLISECONDS, myQueue);
+		//maxthread 50, max time in idel 2minutes
+		executor = new ThreadPoolExecutor(0, 50, 120000, TimeUnit.MILLISECONDS, myQueue);
 		System.out.println("Server Ready");
 		ServerSocket serverSocket;
 		try {

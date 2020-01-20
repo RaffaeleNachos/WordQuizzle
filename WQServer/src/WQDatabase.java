@@ -19,16 +19,19 @@ import java.net.DatagramSocket;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-@SuppressWarnings("serial")
 public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	
+	/**
+	 * Serial UID per RMI
+	 */
+	private static final long serialVersionUID = -6559344702339809559L;
+	
 	private HashMap<String, String> passwords;
-	private HashMap<String, User> users;
+	private HashMap<String, WQUser> users;
 	
 	private static MessageDigest digest;
 	
@@ -36,11 +39,12 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	private static String upath = "./users.json";
 	
 	public WQDatabase(boolean exist) {
+		//se non esistono i file di persistenza
 		if (exist == false) {
 			System.out.println("Persistencies files not present");
 			passwords = new HashMap<>();
 			users = new HashMap<>();
-		} else {
+		} else { //se i file di persistenza 
 			System.out.println("Persistencies files found");
 			passwords = new HashMap<>();
 			users = new HashMap<>();
@@ -64,32 +68,9 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			Type typeb = new TypeToken<HashMap<String, User>>(){}.getType();
+			Type typeb = new TypeToken<HashMap<String, WQUser>>(){}.getType();
 	        users = gson.fromJson(ujson, typeb);
 		}
-	}
-	
-	public static String getFileStringy(String path) throws IOException {
-		//creo un channel per la lettura del file
-		FileChannel inChannel = FileChannel.open(Paths.get(path), StandardOpenOption.READ);
-		ByteBuffer buffer = ByteBuffer.allocateDirect(1024*1024);
-        boolean stop = false;
-        String tmp = "";
-        while (!stop) {
-        	int bytesRead = inChannel.read(buffer);
-        	if (bytesRead==-1) {
-        		stop=true;
-        	}
-        	//flippo il puntatore all'inizio per la lettura decodificata
-        	buffer.flip();
-            while (buffer.hasRemaining()) {
-            	tmp = tmp + StandardCharsets.UTF_8.decode(buffer).toString();
-            }
-            //riflippo per scrittura
-            buffer.flip();
-        }
-        inChannel.close();
-        return tmp;
 	}
 	
 	//nella regsitrazione aggiungo i dati nel database degli utenti per il login poi inserisco una istanza di user nel grafo
@@ -101,7 +82,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		if (passwords.containsKey(nickname)) return 11;
 		if (passwords.put(nickname, hashMyPass(nickname + password)) == null) {
 			if (!users.containsKey(nickname)) {
-				users.put(nickname, new User(nickname));
+				users.put(nickname, new WQUser(nickname));
 				//aggiorno entrambi i file (db utenti e password) con la nuova registrazione
 				updatePJSON();
 				updateUJSON();
@@ -210,7 +191,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {
 			Iterator<String> itr = users.get(nickname).getFriends().iterator();
-			ArrayList<User> realRank = new ArrayList<>();
+			ArrayList<WQUser> realRank = new ArrayList<>();
 			while(itr.hasNext()) {
 				//costo costante sulla get dell'istanza del vero utente nella struttura dati
 				realRank.add(users.get(itr.next()));
@@ -218,11 +199,11 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 			//utilizza il compareTo definito nella classe User (ordina secondo il punteggio)
 			Collections.sort(realRank);
 			//a questo punto mi costruisco il JSON da inviare
-			Iterator<User> iter = realRank.iterator();
+			Iterator<WQUser> iter = realRank.iterator();
 			JSONArray lista = new JSONArray();
 			while(iter.hasNext()) {
 				JSONObject usr = new JSONObject();
-				User x = iter.next();
+				WQUser x = iter.next();
 				usr.put("username", x.username);
 				usr.put("points", x.points);
 				lista.add(usr);
@@ -233,7 +214,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	}
 	
 	//metodo che mi restituisce una istanza di user, mi serve per permettere al thread della challenge di aggiungere punti al giocatore
-	public User getUser(String nickname) {
+	public WQUser getUser(String nickname) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {
 			return users.get(nickname);
@@ -338,6 +319,29 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		else return null;
 	}
 	
+	public static String getFileStringy(String path) throws IOException {
+		//creo un channel per la lettura del file
+		FileChannel inChannel = FileChannel.open(Paths.get(path), StandardOpenOption.READ);
+		ByteBuffer buffer = ByteBuffer.allocateDirect(1024*1024);
+        boolean stop = false;
+        String tmp = "";
+        while (!stop) {
+        	int bytesRead = inChannel.read(buffer);
+        	if (bytesRead==-1) {
+        		stop=true;
+        	}
+        	//flippo il puntatore all'inizio per la lettura decodificata
+        	buffer.flip();
+            while (buffer.hasRemaining()) {
+            	tmp = tmp + StandardCharsets.UTF_8.decode(buffer).toString();
+            }
+            //riflippo per scrittura
+            buffer.flip();
+        }
+        inChannel.close();
+        return tmp;
+	}
+	
 	
 	//metodo che si occuopa di aggiornare il JSON delle password (database delle password + nickname)
 	public void updatePJSON() {
@@ -365,7 +369,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	}
 	
 	//metodo che si occupa di aggiornare il JSON degli utenti (database dei dati)
-	private void updateUJSON() {
+	public void updateUJSON() {
 		Gson gson = new Gson();
 		String userjson = gson.toJson(users);
 		try {

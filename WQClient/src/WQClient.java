@@ -6,7 +6,6 @@ import java.io.OutputStreamWriter;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.nio.channels.SelectionKey;
 import java.nio.file.Paths;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -181,7 +180,6 @@ public class WQClient extends Application{
 		try {
 			mys = new DatagramSocket(UDPport);
 		} catch (SocketException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		thnotify = new WQNotify(this, mys);

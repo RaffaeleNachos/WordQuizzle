@@ -260,13 +260,11 @@ public class WQChallenge extends Thread{
 		public int chPoints;
 		public int correctWords;
 		public int wrongWords;
-		public int notAnsweredWords;
 		
 		public Statistics() {
 			chPoints = 0;
 			correctWords = 0;
 			wrongWords = 0;
-			notAnsweredWords = 0;
 			username = null;
 		}
 		
@@ -332,7 +330,7 @@ public class WQChallenge extends Thread{
 	
 	public void checkWords(String word, String username, String cTransl, Statistics stats) {
 		//costo O(1) per avere l'istanza dell'utente per aggiornare il punteggio direttamente nel database
-		User u = db.getUser(username);
+		WQUser u = db.getUser(username);
 		if (u!=null) {
 			if(word.equals(cTransl)) {
 				u.points = u.points + correctPoint;
@@ -343,6 +341,7 @@ public class WQChallenge extends Thread{
 				stats.chPoints = stats.chPoints + wrongPoint;
 				stats.wrongWords++;
 			}
+			db.updateUJSON();
 		}
 	}
 }
