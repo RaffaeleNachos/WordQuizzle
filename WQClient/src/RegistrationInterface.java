@@ -10,5 +10,4 @@ public interface RegistrationInterface extends Remote{
 	//			NullpointerException se nickname || password == null
 	//RETURNS: restituisce un codice di errore relativo al problema riscontrato
 	public int user_registration(String nickname, String password) throws RemoteException, NullPointerException;
-
 }

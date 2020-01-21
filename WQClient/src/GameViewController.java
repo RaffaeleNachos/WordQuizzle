@@ -5,6 +5,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -12,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
+import javafx.scene.effect.GaussianBlur;
 
 public class GameViewController {
 	
@@ -96,13 +98,13 @@ public class GameViewController {
     			labelStatus.setText("CHALLENGE ENDS!. Your score: " + token[1] + " Correct Words: " + token[2] + " Wrong Words: " + token[3] + " | " + token[4]);
     			btnSend.setStyle("-fx-background-color: #DEDEE0");
 				btnSend.setDisable(true);
-    		}
-    		else {
-    			//se ho ricevuto la prima parola parte il timer
-    			if (Double.parseDouble(token[1]) == 0) {
-    				System.out.println("Timer sfida partito");
-    				new ChTimer(60, this);
-    			}
+    		} else if (token[0].equals("TIMEOUT") && token.length==5) {
+				btnSend.setStyle("-fx-background-color: #DEDEE0");
+				btnSend.setEffect(new GaussianBlur());
+				btnSend.setDisable(true);
+				labelTimeOver.setVisible(true);
+				labelStatus.setText("TIMEOUT!. Your score: " + token[1] + " Correct Words: " + token[2] + " Wrong Words: " + token[3] + " | " + token[4]);
+    		} else {
     			itawordlabel.setText(token[0]);
     			progressBar.setProgress(Double.parseDouble(token[1]));
     		}

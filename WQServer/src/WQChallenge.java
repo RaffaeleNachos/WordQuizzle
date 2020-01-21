@@ -40,9 +40,12 @@ public class WQChallenge extends Thread{
 	private WQDatabase db;
 	//variabile atomica in memoria principale che si occupa di capire quando entrambi i client hanno finito
 	private volatile AtomicInteger endusers;
+	//variabile atomica che mi gestisce il timer della sfida
+	public volatile AtomicInteger to;
 	//punti da assegnare
 	private static int correctPoint = 3;
 	private static int wrongPoint = -1;
+	private static int bonusPoint = +5;
 	//dove mi salvo le chiavi per il recap finale
 	private ArrayList<SelectionKey> finalkeys;
 	
@@ -51,6 +54,7 @@ public class WQChallenge extends Thread{
 		this.db = db;
 		finalkeys = new ArrayList<>();
 		endusers = new AtomicInteger(0);
+		to = new AtomicInteger(0);
 		selectedWords = new ArrayList<>();
 		parser = new JSONParser();
 	}
@@ -119,11 +123,13 @@ public class WQChallenge extends Thread{
 						//creo una nuova chiave associata alla socket client
 						SelectionKey clientkey = client.register(selector, SelectionKey.OP_WRITE, new WQWord(null, 0));
 						finalkeys.add(clientkey);
-						//appena qualcuno si collega mi occupo di interrogare le API
+						//appena qualcuno si collega mi occupo di interrogare le API e faccio partire il timer
 						if (translatedWords == null) {
 							translatedWords = new ArrayList<>();
 							translateWords();
 							System.out.println("Traduzioni: " + translatedWords.toString());
+							//timer della sfida
+							new WQChallTimer(30, this);
 						}
 					}
 					else if (key.isWritable()) {
@@ -133,35 +139,44 @@ public class WQChallenge extends Thread{
 						//se la parola è null vuol dire che è stata scritta tutta e se ne può inviare una nuova
 						if (myWord.getWord() == null) {
 							//mando nuova parola e double che indica la percentuale della progressbar da settare
-							//caso in cui entrambi i giocatori stanno ancora giocando
-							if (myWord.getIndex() < K && endusers.get() != 1) {
+							//caso in cui entrambi i giocatori stanno ancora giocando e il timer non è scaduto
+							if (myWord.getIndex() < K && endusers.get() != 1 && to.get()==0) {
 								//percentuale che invia il client al server per la progressbar
 								double perc = (double) myWord.getIndex() * (double) ( 1.0 / (double) (K - 1));
 								System.out.println(perc);
 								//metto la parola in italiano seguita dalla percentuale da assegnare alla progressbar
 								myWord.setWord(selectedWords.get(myWord.getIndex()) + " " + perc);
 							}
-							//nel caso in cui uno dei due termina (enduser è 1) oppure le parole sono terminate
+							//nel caso in cui uno dei due termina (enduser è 1) oppure le parole sono terminate oppure il timer è scaduto
 							else {
 								//System.out.println("mando chend");
 								//recap finale per inviare le statistiche finali + hai vinto/hai perso
+								String firsttoken = null;
+								if (to.get()==1) {
+									firsttoken = "TIMEOUT ";
+								} else {
+									firsttoken = "CHEND ";
+								}
 								WQWord A = (WQWord) finalkeys.get(0).attachment();
 								WQWord B = (WQWord) finalkeys.get(1).attachment();
 								if (A!=null) System.out.println(A.stat.username);
 								if (B!=null) System.out.println(B.stat.username);
 								//se i punteggi sono uguali parità
 								if (A.stat.chPoints == B.stat.chPoints) {
-									myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " DRAW");
+									myWord.setWord(firsttoken + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " DRAW");
 								}
 								else if (A.stat.chPoints > B.stat.chPoints && myWord.stat.username.equals(A.stat.username)) {
-									System.out.println("ha vinto " + A.stat.username + " con punti " + A.stat.chPoints + " contro " + B.stat.username + " con punti " + B.stat.chPoints);
-									myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " WIN");
+									//System.out.println("ha vinto " + A.stat.username + " con punti " + A.stat.chPoints + " contro " + B.stat.username + " con punti " + B.stat.chPoints);
+									myWord.setWord(firsttoken + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " WIN");
+									//aggiungo punti bonus
+									addPointsToWinner(myWord.stat.username);
 								}
 								else if (B.stat.chPoints > A.stat.chPoints && myWord.stat.username.equals(B.stat.username)) {
-									System.out.println("ha vinto " + B.stat.username + " con punti " + B.stat.chPoints + " contro " + A.stat.username + " con punti " + A.stat.chPoints);
-									myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " WIN");
+									//System.out.println("ha vinto " + B.stat.username + " con punti " + B.stat.chPoints + " contro " + A.stat.username + " con punti " + A.stat.chPoints);
+									myWord.setWord(firsttoken + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " WIN");
+									addPointsToWinner(myWord.stat.username);
 								}
-								else myWord.setWord("CHEND " + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " LOSE");
+								else myWord.setWord(firsttoken + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " LOSE");
 								endusers.incrementAndGet();
 							}
 						}
@@ -224,8 +239,8 @@ public class WQChallenge extends Thread{
 								//per poter gestire la classifica finale
 								if (myWord.stat.username == null) myWord.stat.username = token[0];
 								//parolainglese - username - parolaitaliana - classe per le statistiche finali
-								//conto il punteggio solo se l'altro utente non ha finito
-								if (endusers.get()!=1) checkWords(token[1], token[0], translatedWords.get(myWord.getIndex()), myWord.stat);
+								//conto il punteggio solo se l'altro utente non ha finito oppure il timer non è scaduto
+								if (endusers.get()==0 && to.get()==0 ) checkWords(token[1], token[0], translatedWords.get(myWord.getIndex()), myWord.stat);
 								myWord.setWord(null);
 								myWord.incIndex();
 								key.attach(myWord);
@@ -252,6 +267,7 @@ public class WQChallenge extends Thread{
 				}
 			}
 		}
+		db.updateUJSON();
 		System.out.println("Challenge Thread Shutdown...");
 	}
 	
@@ -328,6 +344,13 @@ public class WQChallenge extends Thread{
 		}
 	}
 	
+	public void addPointsToWinner(String username) {
+		WQUser u = db.getUser(username);
+		if (u!=null) {
+			u.points = u.points + bonusPoint;
+		}
+	}
+	
 	public void checkWords(String word, String username, String cTransl, Statistics stats) {
 		//costo O(1) per avere l'istanza dell'utente per aggiornare il punteggio direttamente nel database
 		WQUser u = db.getUser(username);
@@ -341,7 +364,6 @@ public class WQChallenge extends Thread{
 				stats.chPoints = stats.chPoints + wrongPoint;
 				stats.wrongWords++;
 			}
-			db.updateUJSON();
 		}
 	}
 }
