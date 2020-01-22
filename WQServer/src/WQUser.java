@@ -26,8 +26,7 @@ public class WQUser implements Comparable<WQUser>{
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	public InetAddress getIA() {
 		return ia;
 	}

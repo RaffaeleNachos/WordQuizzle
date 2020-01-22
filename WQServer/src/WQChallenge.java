@@ -45,7 +45,7 @@ public class WQChallenge extends Thread{
 	//punti da assegnare
 	private static int correctPoint = 3;
 	private static int wrongPoint = -1;
-	private static int bonusPoint = +5;
+	private static int bonusPoint = 5;
 	//dove mi salvo le chiavi per il recap finale
 	private ArrayList<SelectionKey> finalkeys;
 	

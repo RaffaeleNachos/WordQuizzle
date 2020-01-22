@@ -14,7 +14,6 @@ public class WQChallTimer{
 	class RemindTask extends TimerTask {
 		public void run() {
 			if (chTh.isAlive()) {
-				System.out.println("var aumentata");
 				chTh.to.incrementAndGet();
 			}
 		}

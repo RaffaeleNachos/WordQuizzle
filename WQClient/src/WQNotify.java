@@ -34,7 +34,7 @@ public class WQNotify extends Thread{
 				if (tokens[0].equals("CH") && tokens.length == 3) {
 					//System.out.println("Client ho ricevuto CH");
 					//setto al client la porta TCP (mi servirà per poi quando parte il gioco)
-					client_master.setTCPport(Integer.parseInt(tokens[2]));
+					client_master.TCPport = Integer.parseInt(tokens[2]);
 					//prendo ip e porta UDP del server dal pacchetto per potergli spedire la risposta
 					destia = receivedPacket.getAddress();
 					destport = receivedPacket.getPort();
@@ -62,7 +62,7 @@ public class WQNotify extends Thread{
 				//sfidante nel caso di sfida accettata
 				if (tokens[0].equals("ACCEPTED") && tokens.length == 2) {
 					//setto la porta TCP per la sfida
-					client_master.setTCPport(Integer.parseInt(tokens[1]));
+					client_master.TCPport = Integer.parseInt(tokens[1]);
 					//System.out.println("Client ho ricevuto ACCEPTED");
 					//serve per aggiornare la gui nei thread javafx altrimenti non si può aggiornare.
 					Platform.runLater(new Runnable() {

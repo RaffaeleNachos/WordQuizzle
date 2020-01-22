@@ -5,7 +5,6 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -48,9 +47,9 @@ public class GameViewController {
 			socketChannel = SocketChannel.open();
 			socketChannel.connect(socket);
 			System.out.println("Collegato a: " + socketChannel);
+			//imposto lo stato in lettura
 			readStatus();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -95,7 +94,7 @@ public class GameViewController {
     		byteBuffer.flip();
     		String token[] = tmp.split("\\s+");
     		if (token[0].equals("CHEND") && token.length==5) {
-    			labelStatus.setText("CHALLENGE ENDS!. Your score: " + token[1] + " Correct Words: " + token[2] + " Wrong Words: " + token[3] + " | " + token[4]);
+    			labelStatus.setText("CHALLENGE ENDS! Your score: " + token[1] + " Correct Words: " + token[2] + " Wrong Words: " + token[3] + " | " + token[4]);
     			btnSend.setStyle("-fx-background-color: #DEDEE0");
 				btnSend.setDisable(true);
     		} else if (token[0].equals("TIMEOUT") && token.length==5) {
@@ -103,7 +102,7 @@ public class GameViewController {
 				btnSend.setEffect(new GaussianBlur());
 				btnSend.setDisable(true);
 				labelTimeOver.setVisible(true);
-				labelStatus.setText("TIMEOUT!. Your score: " + token[1] + " Correct Words: " + token[2] + " Wrong Words: " + token[3] + " | " + token[4]);
+				labelStatus.setText("TIMEOUT! Your score: " + token[1] + " Correct Words: " + token[2] + " Wrong Words: " + token[3] + " | " + token[4]);
     		} else {
     			itawordlabel.setText(token[0]);
     			progressBar.setProgress(Double.parseDouble(token[1]));

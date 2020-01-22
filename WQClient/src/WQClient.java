@@ -39,7 +39,7 @@ public class WQClient extends Application{
 	//porta per le notifiche
 	private int UDPport;
 	//porta per la sfida
-	private int TCPport;
+	public int TCPport;
 	private WQNotify thnotify;
 	private RegisterLoginController logincontroller;
 	private MainViewController maincontroller;
@@ -52,6 +52,25 @@ public class WQClient extends Application{
 		primaryStage.setTitle("Word Quizzle");
 		gotoLogin();
 		primaryStage.show();
+	}
+	
+	public static void main(String[] args) {
+		Registry r;
+		//RemoteObject: spazio di indirizzamento diverso, gira su un'altra JVM
+		Remote remoteObj;
+		try {
+			//getRegistry(String host, int port) nel caso di host remoti
+			r = LocateRegistry.getRegistry(6789);
+			//eseguo la lookup nel registry e mi restituisce un oggetto remoto
+			remoteObj = r.lookup("USER-REG");
+			regGest = (RegistrationInterface) remoteObj;
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
+		//dopo aver instaurato la connessione con il registry offerto dal server parte l'interfaccia grafica
+		launch();
 	}
 	
 	//meotodo che mi permette di tornare alla finestra di login/registrazione
@@ -130,25 +149,6 @@ public class WQClient extends Application{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public static void main(String[] args) {
-		Registry r;
-		//RemoteObject: spazio di indirizzamento diverso, gira su un'altra JVM
-		Remote remoteObj;
-		try {
-			//getRegistry(String host, int port) nel caso di host remoti
-			r = LocateRegistry.getRegistry(6789);
-			//eseguo la lookup nel registry e mi restituisce un oggetto remoto
-			remoteObj = r.lookup("USER-REG");
-			regGest = (RegistrationInterface) remoteObj;
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (NotBoundException e) {
-			e.printStackTrace();
-		}
-		//dopo aver instaurato la connessione con il registry offerto dal server parte l'interfaccia grafica
-		launch();
 	}
 	
 	public int login_handler(String username, String password) {
@@ -316,11 +316,6 @@ public class WQClient extends Application{
 		thnotify.decline();
 		//setto invisibile la tab notifiche
 		maincontroller.setNotifyTabInvisible();
-	}
-	
-	//setta la porta TCP per la sfida
-	public void setTCPport(int port) {
-		TCPport = port;
 	}
 	
 	public static String codetoString(int code) {

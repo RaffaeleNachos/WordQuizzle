@@ -26,13 +26,14 @@ import com.google.gson.reflect.TypeToken;
 public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	
 	/**
-	 * Serial UID per RMI
+	 * Serial UID per serializzazione RMI
 	 */
 	private static final long serialVersionUID = -6559344702339809559L;
 	
 	private HashMap<String, String> passwords;
 	private HashMap<String, WQUser> users;
 	
+	//necessario per l'hashing
 	private static MessageDigest digest;
 	
 	private static String ppath = "./passwords.json";

@@ -24,11 +24,6 @@ public class WQTask implements Runnable{
 	public void run() {
 		System.out.println("Nuovo client eseguito da " + Thread.currentThread().getName());
 		try {
-			clientsocket = new DatagramSocket();
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
-		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			String line = reader.readLine();
@@ -37,7 +32,11 @@ public class WQTask implements Runnable{
 			String[] tokens = line.split("\\s+");
 			while(!tokens[0].equals("LOGOUT")) {
 				if (tokens[0].equals("LOGIN") && tokens.length == 5) {
-					writer.write(Integer.toString(db.user_login(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4]))));
+					int err = db.user_login(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4]));
+					if(err==12) { //se login ok allora creo la socket per le notifiche, al logout la chiuderò
+						clientsocket = new DatagramSocket();
+					}
+					writer.write(Integer.toString(err));
 					writer.newLine(); 
 					writer.flush();
 				}
@@ -130,6 +129,9 @@ public class WQTask implements Runnable{
 			writer.write(Integer.toString(db.user_logout(tokens[1])));
 			writer.newLine(); 
 			writer.flush();
+			//al logout chiudo le socket
+			clientsocket.close();
+			socket.close();
 			System.out.println("Thread Exiting...");
 		} catch (IOException e) {
 			e.printStackTrace();
