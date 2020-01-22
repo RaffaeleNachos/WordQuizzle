@@ -97,7 +97,7 @@ public class WQTask implements Runnable{
 							//allo sfidante mando "DECLINED"
 							db.challengedeclined(tokens[1], clientsocket);
 							//allo sfidato mando "TIMEOUT" per eliminare la notifica
-							db.timeout(tokens[2], clientsocket);
+							db.timeout(tokens[1], tokens[2], clientsocket);
 							//unico metodo per fermare il thread bloccato sulla select
 							if (wqc.isAlive()) wqc.interrupt();
 						}

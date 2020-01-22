@@ -1,1 +1,1 @@
-{"a":{"username":"a","points":5,"stringfriends":["b"]},"b":{"username":"b","points":-3,"stringfriends":["a"]},"raffaele":{"username":"raffaele","points":-1,"stringfriends":["claudio"]},"claudio":{"username":"claudio","points":2,"stringfriends":["raffaele"]}}
+{"a":{"username":"a","points":0,"stringfriends":["b","c"]},"b":{"username":"b","points":0,"stringfriends":["a","c"]},"c":{"username":"c","points":0,"stringfriends":["b","a"]}}

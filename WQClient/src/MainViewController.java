@@ -1,4 +1,6 @@
+import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -48,9 +50,14 @@ public class MainViewController {
 	private AnchorPane notifyPane;
 
 	private WQClient client_master;
+	private WQNotify notify_master;
 	
-	public void setClient(WQClient client) {
+	//arraylist di notifiche
+	private LinkedList<Notify> notifications = new LinkedList<>();
+	
+	public void setClient(WQClient client, WQNotify notifier) {
         this.client_master = client;
+        this.notify_master = notifier;
     }
 	
 	public void setPoints(int num_points) {
@@ -61,9 +68,10 @@ public class MainViewController {
 		username.setText(g_username);
 	}
 	
-	//rendono visibile ed invisibile il contenuto della tab delle notifioche 
-	public void setNotifyTabVisible(String nick) {
-		chnotificationlabel.setText(nick);
+	//rendono visibile ed invisibile il contenuto della tab delle notifiche 
+	public void setNotifyTabVisible() {
+		Notify peek = notifications.peekLast();
+		chnotificationlabel.setText(peek.username);
 		notifyPane.setVisible(true);
 	}
 	
@@ -108,12 +116,20 @@ public class MainViewController {
 	
 	//per lo sfidato nella tab delle notifiche accettazione
 	public void declinebtnAction(ActionEvent event) {
-		client_master.decline_handler();
+		Notify removed = notifications.removeLast();
+		notify_master.decline(removed.destIA, removed.UDPport);
+		if (notifications.isEmpty()) setNotifyTabInvisible();
+		else setNotifyTabVisible();
 	}
 	
 	//per lo sfidato nella tab delle notifoiche accettazione
 	public void acceptbtnAction(ActionEvent event) {
-		client_master.accept_handler();
+		Notify removed = notifications.removeLast();
+		notify_master.accept(removed.destIA, removed.UDPport);
+		client_master.TCPport = removed.TCPport;
+		setNotifyTabInvisible();
+		notifications.clear();
+		client_master.gotoGame();
 	}
 	
 	//per lo sfidante nel main controller
@@ -125,6 +141,35 @@ public class MainViewController {
 		if (err==21) {
 			btnChallenge.setStyle("-fx-background-color: #DEDEE0");
 			btnChallenge.setDisable(true);
+		}
+	}
+	
+	public void addNotification(String username, InetAddress destIA, int TCPport, int UDPport) {
+		notifications.addFirst(new Notify(username, destIA, TCPport, UDPport));
+		System.out.println("aggiunto");
+		setNotifyTabVisible();
+	}
+	
+	public void removeNotification(String username) {
+		for (int i = 0; i< notifications.size(); i++) {
+			if (notifications.get(i).username.equals(username)) {
+				notifications.remove(i);
+			}
+		}
+		setNotifyTabVisible();
+	}
+	
+	public class Notify{
+		InetAddress destIA;
+		int TCPport;
+		int UDPport;
+		String username;
+		
+		public Notify(String username, InetAddress destIA, int TCPport, int UDPport) {
+			this.destIA = destIA;
+			this.TCPport = TCPport;
+			this.UDPport = UDPport;
+			this.username = username;
 		}
 	}
 	

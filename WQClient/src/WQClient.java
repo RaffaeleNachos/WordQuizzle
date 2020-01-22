@@ -104,7 +104,7 @@ public class WQClient extends Application{
 			Parent layoutmain = loader.load();
 			//setta il controller per gli elementi della gui della finestra main
 			maincontroller = loader.getController();
-            maincontroller.setClient(this);
+            maincontroller.setClient(this,thnotify);
             //setto i punti e username nella tab Your. Info.
             maincontroller.setPoints(points_handler());
             maincontroller.setUsername(user);
@@ -300,22 +300,6 @@ public class WQClient extends Application{
 			e.printStackTrace();
 		}
 		return 0;
-	}
-	
-	public void accept_handler() {
-		//UDP accettazione
-		thnotify.accept();
-		//setto invisibile la tab notifiche
-		maincontroller.setNotifyTabInvisible();
-		//mando la GUI in modalità GIOCO per lo sfidato
-		gotoGame();
-	}
-	
-	public void decline_handler() {
-		//utilizzo UDP per declinare l'offerta di sfida
-		thnotify.decline();
-		//setto invisibile la tab notifiche
-		maincontroller.setNotifyTabInvisible();
 	}
 	
 	public static String codetoString(int code) {

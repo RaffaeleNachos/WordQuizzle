@@ -285,8 +285,8 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	}
 	
 	//inviati allo sfidato
-	public void timeout(String nickfriend, DatagramSocket s) {
-		String tmp = "TIMEOUT";
+	public void timeout(String nickname, String nickfriend, DatagramSocket s) {
+		String tmp = "TIMEOUT " + nickname;
 		byte[] buffer=tmp.getBytes();
 		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickfriend).getIA(), users.get(nickfriend).getPort());
 		try {

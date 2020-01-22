@@ -10,9 +10,9 @@ public class WQNotify extends Thread{
 
 	private MainViewController masterContr;
 	private DatagramSocket mys;
-	private InetAddress destia;
-	private int destport;
 	private WQClient client_master;
+	private InetAddress destia;
+	private int UDPport;
 	
 	public WQNotify (WQClient client_master, DatagramSocket mys) {
 		this.client_master = client_master;	
@@ -32,29 +32,23 @@ public class WQNotify extends Thread{
 				
 				//messaggi ricevuti dallo sfidato
 				if (tokens[0].equals("CH") && tokens.length == 3) {
-					//System.out.println("Client ho ricevuto CH");
-					//setto al client la porta TCP (mi servirà per poi quando parte il gioco)
-					client_master.TCPport = Integer.parseInt(tokens[2]);
-					//prendo ip e porta UDP del server dal pacchetto per potergli spedire la risposta
 					destia = receivedPacket.getAddress();
-					destport = receivedPacket.getPort();
-					//questo thread verrà eseguito sui thread associati a javafx, non è possibile aggiornare la GUI da thread non appartenenti a javafx
+					UDPport = receivedPacket.getPort();
 					Platform.runLater(new Runnable() {
 						@Override
 			            public void run() {
-							//rendo visibile la tab delle notifiche, passo come paramentro il username dello sfidante
-			            	masterContr.setNotifyTabVisible(tokens[1]);
+							masterContr.addNotification(tokens[1], destia, Integer.parseInt(tokens[2]), UDPport);
 			            }
 			          });
 				}
 				//se non rispondo in tempo ricevo timeout
-				if (tokens[0].equals("TIMEOUT")) {
+				if (tokens[0].equals("TIMEOUT") && tokens.length == 2) {
 					//System.out.println("Client ho ricevuto TIMEOUT");
 					Platform.runLater(new Runnable() {
 						@Override
 			            public void run() {
 							//rendo invisibile la tab delle notifiche
-			            	masterContr.setNotifyTabInvisible();
+			            	masterContr.removeNotification(tokens[1]);
 			            }
 			          });
 				}
@@ -101,7 +95,7 @@ public class WQNotify extends Thread{
 	}
 	
 	//inviato dallo sfidato al server
-	public void accept() {
+	public void accept(InetAddress destia, int destport) {
 		String tmp = "ACCEPT";
 		byte[] buffer=tmp.getBytes();
 		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, destia, destport);
@@ -110,11 +104,11 @@ public class WQNotify extends Thread{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//masterContr.setNotifyTabInvisible();
+		masterContr.setNotifyTabInvisible();
 	}
 	
 	//inviato dallo sfidato al server
-	public void decline() {
+	public void decline(InetAddress destia, int destport) {
 		String tmp = "DECLINE";
 		byte[] buffer=tmp.getBytes();
 		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, destia, destport);
@@ -123,6 +117,6 @@ public class WQNotify extends Thread{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//masterContr.setNotifyTabInvisible();
+		masterContr.setNotifyTabInvisible();
 	}
 }
