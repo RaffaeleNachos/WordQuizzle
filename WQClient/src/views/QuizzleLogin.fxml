@@ -16,29 +16,29 @@
             <Image url="@quizzle.png" />
          </image>
       </ImageView>
-      <Button id="Login" fx:id="loginbtn" layoutX="162.0" layoutY="301.0" mnemonicParsing="false" onAction="#loginbtnAction" prefHeight="27.0" prefWidth="128.0" style="-fx-background-color: #FF9800; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );;" text="Login" textFill="#212121">
+      <Button id="Login" fx:id="loginbtn" layoutX="162.0" layoutY="301.0" mnemonicParsing="false" onAction="#loginbtnAction" prefHeight="27.0" prefWidth="128.0" style="-fx-background-color: #FF9800; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );;" text="Login" textFill="#212121" wrapText="true">
          <font>
-            <Font name="Arial" size="15.0" />
+            <Font name="Arial" size="14.0" />
          </font>
       </Button>
-      <Button id="Login" fx:id="registerbtn" layoutX="310.0" layoutY="301.0" mnemonicParsing="false" onAction="#registerbtnAction" prefHeight="27.0" prefWidth="128.0" style="-fx-background-color: F26D00; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );" text="Register" textFill="#212121">
+      <Button id="Login" fx:id="registerbtn" layoutX="310.0" layoutY="301.0" mnemonicParsing="false" onAction="#registerbtnAction" prefHeight="27.0" prefWidth="128.0" style="-fx-background-color: F26D00; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );" text="Register" textFill="#212121" wrapText="true">
          <font>
-            <Font name="Arial" size="15.0" />
+            <Font name="Arial" size="14.0" />
          </font>
       </Button>
       <PasswordField fx:id="passfield" alignment="CENTER" layoutX="162.0" layoutY="239.0" prefHeight="41.0" prefWidth="276.0" promptText="password" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );;">
          <font>
-            <Font name="Arial" size="15.0" />
+            <Font name="Arial" size="14.0" />
          </font>
       </PasswordField>
       <TextField fx:id="userfield" alignment="CENTER" layoutX="162.0" layoutY="180.0" prefHeight="41.0" prefWidth="276.0" promptText="username" style="-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );;">
          <font>
-            <Font name="Arial" size="15.0" />
+            <Font name="Arial" size="14.0" />
          </font>
       </TextField>
-      <Label fx:id="errors" alignment="CENTER" contentDisplay="CENTER" layoutX="143.0" layoutY="357.0" prefHeight="20.0" prefWidth="315.0" text="Raffaele Apetino @ 2020" textFill="WHITE" AnchorPane.leftAnchor="145.0" AnchorPane.rightAnchor="145.0">
+      <Label fx:id="errors" alignment="CENTER" contentDisplay="CENTER" layoutX="146.0" layoutY="353.0" prefHeight="20.0" prefWidth="315.0" text="Raffaele Apetino @ 2020" textFill="WHITE" wrapText="true" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
          <font>
-            <Font name="Arial" size="16.0" />
+            <Font name="Arial" size="14.0" />
          </font>
       </Label>
    </children>
