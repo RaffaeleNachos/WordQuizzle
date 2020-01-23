@@ -59,7 +59,7 @@ public class WQClient extends Application{
 		//RemoteObject: spazio di indirizzamento diverso, gira su un'altra JVM
 		Remote remoteObj;
 		try {
-			//getRegistry(String host, int port) nel caso di host remoti
+			//r = LocateRegistry.getRegistry(serverIA, 6789); //nel caso di host remoti
 			r = LocateRegistry.getRegistry(6789);
 			//eseguo la lookup nel registry e mi restituisce un oggetto remoto
 			remoteObj = r.lookup("USER-REG");
