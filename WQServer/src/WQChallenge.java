@@ -41,7 +41,7 @@ public class WQChallenge extends Thread{
 	//variabile atomica in memoria principale che si occupa di capire quando entrambi i client hanno finito
 	private volatile AtomicInteger endusers;
 	//variabile atomica che mi gestisce il timer della sfida
-	public volatile AtomicInteger to;
+	public volatile AtomicInteger timeover;
 	//punti da assegnare
 	private static int correctPoint = 3;
 	private static int wrongPoint = -1;
@@ -54,7 +54,7 @@ public class WQChallenge extends Thread{
 		this.db = db;
 		finalkeys = new ArrayList<>();
 		endusers = new AtomicInteger(0);
-		to = new AtomicInteger(0);
+		timeover = new AtomicInteger(0);
 		selectedWords = new ArrayList<>();
 		parser = new JSONParser();
 	}
@@ -140,7 +140,7 @@ public class WQChallenge extends Thread{
 						if (myWord.getWord() == null) {
 							//mando nuova parola e double che indica la percentuale della progressbar da settare
 							//caso in cui entrambi i giocatori stanno ancora giocando e il timer non è scaduto
-							if (myWord.getIndex() < K && endusers.get() != 1 && to.get()==0) {
+							if (myWord.getIndex() < K && endusers.get() != 1 && timeover.get()==0) {
 								//percentuale che invia il client al server per la progressbar
 								double perc = (double) myWord.getIndex() * (double) ( 1.0 / (double) (K - 1));
 								System.out.println(perc);
@@ -152,7 +152,7 @@ public class WQChallenge extends Thread{
 								//System.out.println("mando chend");
 								//recap finale per inviare le statistiche finali + hai vinto/hai perso
 								String firsttoken = null;
-								if (to.get()==1) {
+								if (timeover.get()==1) {
 									firsttoken = "TIMEOUT ";
 								} else {
 									firsttoken = "CHEND ";
@@ -240,7 +240,7 @@ public class WQChallenge extends Thread{
 								if (myWord.stat.username == null) myWord.stat.username = token[0];
 								//parolainglese - username - parolaitaliana - classe per le statistiche finali
 								//conto il punteggio solo se l'altro utente non ha finito oppure il timer non è scaduto
-								if (endusers.get()==0 && to.get()==0 ) checkWords(token[1], token[0], translatedWords.get(myWord.getIndex()), myWord.stat);
+								if (endusers.get()==0 && timeover.get()==0 ) checkWords(token[1], token[0], translatedWords.get(myWord.getIndex()), myWord.stat);
 								myWord.setWord(null);
 								myWord.incIndex();
 								key.attach(myWord);
