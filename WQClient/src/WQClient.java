@@ -28,31 +28,24 @@ import javafx.stage.Stage;
 public class WQClient extends Application{
 	
 	public static RegistrationInterface regGest;
-	private Socket c_socket;
-	private DatagramSocket mys;
+	private Socket myTCPsocket;
+	private DatagramSocket myUDPsocket;
 	private static FXMLLoader loader;
 	private static Stage stage;
 	private BufferedWriter writer;
 	private BufferedReader reader;
-	public String user;
+	public String myUsername;
 	private JSONParser parser = new JSONParser();
 	//porta per le notifiche
 	private int UDPport;
 	//porta per la sfida
-	public int TCPport;
-	private WQNotify thnotify;
+	public int ChallengeTCPport;
+	private WQNotify notifyThread;
 	private RegisterLoginController logincontroller;
 	private MainViewController maincontroller;
 	private GameViewController gamecontroller;
+	//nel caso di un server non in locale, basta cambiare questa stringa con l'indirizzo del server
 	private static String serverIA = "localhost";
-	
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-		stage = primaryStage;
-		primaryStage.setTitle("Word Quizzle");
-		gotoLogin();
-		primaryStage.show();
-	}
 	
 	public static void main(String[] args) {
 		Registry r;
@@ -70,7 +63,16 @@ public class WQClient extends Application{
 			e.printStackTrace();
 		}
 		//dopo aver instaurato la connessione con il registry offerto dal server parte l'interfaccia grafica
+		System.out.println("WQClient | launching graphic interface");
 		launch();
+	}
+	
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		stage = primaryStage;
+		primaryStage.setTitle("Word Quizzle");
+		gotoLogin();
+		primaryStage.show();
 	}
 	
 	//meotodo che mi permette di tornare alla finestra di login/registrazione
@@ -80,6 +82,10 @@ public class WQClient extends Application{
 			loader = new FXMLLoader();
 			loader.setLocation(Paths.get("src/views/QuizzleLogin.fxml").toUri().toURL());
 			Parent layoutmain = loader.load();
+			//a questo punto setta il controller dei vari componenti della gui -> RegisterLoginController
+        	logincontroller = loader.getController();
+        	//passo riferimento di questa classe per accedere al registry per la registrazione e per accedere ai metodi handler definiti in questa classe
+            logincontroller.setClient(this);
 			Scene scene = stage.getScene();
 			if (scene == null) {
         		scene = new Scene(layoutmain);
@@ -88,10 +94,6 @@ public class WQClient extends Application{
         		stage.getScene().setRoot(layoutmain);
         	}
 			stage.sizeToScene();
-			//a questo punto setta il controller dei vari componenti della gui -> RegisterLoginController
-        	logincontroller = loader.getController();
-        	//passo riferimento di questa classe per accedere al registry per la registrazione e per accedere ai metodi handler definiti qui
-            logincontroller.setClient(this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -104,17 +106,18 @@ public class WQClient extends Application{
 			Parent layoutmain = loader.load();
 			//setta il controller per gli elementi della gui della finestra main
 			maincontroller = loader.getController();
-            maincontroller.setClient(this,thnotify);
-            //setto i punti e username nella tab Your. Info.
+			//passo riferimento di questa classe e del thread delle notifiche
+            maincontroller.setClient(this, notifyThread);
+            //setto i punti e username nella tab "Your Info."
             maincontroller.setPoints(points_handler());
-            maincontroller.setUsername(user);
+            maincontroller.setUsername(myUsername);
             //popolo la lista delle amicizie
             maincontroller.populateList(list_handler());
             //la gui ha di default la vista della tab delle notifiche che però deve essere vista solo quando c'è 
-            //una effettiva notifica. per questo appena entrato la posto in modalità invisibile (diventerà visibile alla prima notifica)
+            //una effettiva notifica. per questo appena entrato la posto in modalità invisibile (diventerà visibile alla prima notifica o se ci sono notifiche in coda)
             maincontroller.setNotifyTabInvisible();
             //qui appunto passo il riferimento al controller al thread delle notifiche perchè sarà lui ad occuparsi di rendere visibile la notification Tab.
-            thnotify.setController(maincontroller);
+            notifyThread.setController(maincontroller);
 			Scene scene = stage.getScene();
 			if (scene == null) {
         		scene = new Scene(layoutmain);
@@ -135,9 +138,10 @@ public class WQClient extends Application{
 			Parent layoutmain = loader.load();
 			//setto controller per il gioco
 			gamecontroller = loader.getController();
+			//passo il riferimento di questa classe
             gamecontroller.setClient(this);
-            //passo come parametro la porta della sfida e l'indirizzo del server
-            gamecontroller.setSocket(TCPport, c_socket.getInetAddress());
+            //setto la porta della sfida e l'indirizzo del server
+            gamecontroller.setSocket(ChallengeTCPport, myTCPsocket.getInetAddress());
 			Scene scene = stage.getScene();
 			if (scene == null) {
         		scene = new Scene(layoutmain);
@@ -154,20 +158,20 @@ public class WQClient extends Application{
 	public int login_handler(String username, String password) {
 		int err = 0;
 		try {
-			c_socket = new Socket(serverIA, 6790);
+			myTCPsocket = new Socket(serverIA, 6790);
 			//creo porta e processo per le notifiche
 			UDPport = (int) ((Math.random() * ((65535 - 1024) + 1)) + 1024);
 			//scrivo tramite tcp le informazioni di login
-			writer = new BufferedWriter(new OutputStreamWriter(c_socket.getOutputStream()));
-			reader = new BufferedReader(new InputStreamReader(c_socket.getInputStream()));
-			writer.write("LOGIN " + username + " " + password + " " + c_socket.getInetAddress().getHostAddress() + " " + UDPport); 
+			writer = new BufferedWriter(new OutputStreamWriter(myTCPsocket.getOutputStream()));
+			reader = new BufferedReader(new InputStreamReader(myTCPsocket.getInputStream()));
+			writer.write("LOGIN " + username + " " + password + " " + myTCPsocket.getInetAddress().getHostAddress() + " " + UDPport); 
 			writer.newLine(); 
 			writer.flush();
 			err = Integer.parseInt(reader.readLine());
 			//nel caso in cui il login è errato cancello la socket creata
 			if (err != 12) {
-				System.out.println("Cleaning...");
-				c_socket.close();
+				System.out.println("WQClient | login failed. Cleaning...");
+				myTCPsocket.close();
 				writer.close();
 				reader.close();
 				return err;
@@ -175,25 +179,26 @@ public class WQClient extends Application{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//se il login è ok a questo punto setto user che è una variabile che mi serve per tutte quelle operazioni che la gui 
+		//se il login è ok a questo punto setto myUsername che è una variabile che mi serve per tutte quelle operazioni che la gui 
 		//fa in automatico come richiedere il punteggio o la lista degli amici e faccio partire il thread delle notifiche
+		System.out.println("WQClient | UDP notifications on port: " + UDPport);
 		try {
-			mys = new DatagramSocket(UDPport);
+			myUDPsocket = new DatagramSocket(UDPport);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
-		thnotify = new WQNotify(this, mys);
-		thnotify.start();
-		user = username;
+		notifyThread = new WQNotify(this, myUDPsocket);
+		notifyThread.start();
+		myUsername = username;
 		return err;
 	}
 	
 	public int logout_handler() {
 		try {
-			writer.write("LOGOUT " + user); 
+			writer.write("LOGOUT " + myUsername); 
 			writer.newLine(); 
 			writer.flush();
-			if (thnotify.isAlive()) mys.close();
+			if (notifyThread.isAlive()) myUDPsocket.close();
 			return Integer.parseInt(reader.readLine());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -203,7 +208,7 @@ public class WQClient extends Application{
 	
 	public int add_handler(String nickname) {
 		try {
-			writer.write("ADD " + user + " " + nickname); 
+			writer.write("ADD " + myUsername + " " + nickname); 
 			writer.newLine(); 
 			writer.flush();
 			return Integer.parseInt(reader.readLine());
@@ -215,7 +220,7 @@ public class WQClient extends Application{
 	
 	public int del_handler(String nickname) {
 		try {
-			writer.write("REMOVE " + user + " " + nickname); 
+			writer.write("REMOVE " + myUsername + " " + nickname); 
 			writer.newLine(); 
 			writer.flush();
 			return Integer.parseInt(reader.readLine());
@@ -227,7 +232,7 @@ public class WQClient extends Application{
 	
 	public int points_handler() {
 		try {
-			writer.write("POINTS " + user); 
+			writer.write("POINTS " + myUsername); 
 			writer.newLine(); 
 			writer.flush();
 			return Integer.parseInt(reader.readLine());
@@ -239,7 +244,7 @@ public class WQClient extends Application{
 	
 	public ArrayList<String> list_handler() {
 		try {
-			writer.write("LIST " + user); 
+			writer.write("LIST " + myUsername); 
 			writer.newLine(); 
 			writer.flush();
 			//aspetto la risposta
@@ -264,7 +269,7 @@ public class WQClient extends Application{
 	
 	public ArrayList<String> rank_handler() {
 		try {
-			writer.write("RANK " + user); 
+			writer.write("RANK " + myUsername); 
 			writer.newLine(); 
 			writer.flush();
 			//risposta
@@ -273,7 +278,6 @@ public class WQClient extends Application{
 			JSONArray jsonOutArray = null;
 			ArrayList<String> out = new ArrayList<>();
 			try {
-				System.out.println(jsonfile);
 				jsonOutArray = (JSONArray) parser.parse(jsonfile);
 			} catch (ParseException e) {
 				e.printStackTrace();
@@ -292,7 +296,7 @@ public class WQClient extends Application{
 	
 	public int chall_handler(String nickname) {
 		try {
-			writer.write("CHALL " + user + " " + nickname); 
+			writer.write("CHALL " + myUsername + " " + nickname); 
 			writer.newLine(); 
 			writer.flush();
 			return Integer.parseInt(reader.readLine());

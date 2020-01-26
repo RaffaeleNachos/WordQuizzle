@@ -8,6 +8,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 	
 public class RegisterLoginController {
+	
 	@FXML
 	private Button loginbtn;
 	@FXML
@@ -19,29 +20,37 @@ public class RegisterLoginController {
 	@FXML
 	private Label errors;
 	
-	private WQClient client_master;
+	private WQClient clientMaster;
 	
 	public void setClient(WQClient client) {
-        this.client_master = client;
+        this.clientMaster = client;
     }
 	
 	@FXML
 	private void loginbtnAction(ActionEvent event) {
+		if (passfield.getText().isEmpty() || userfield.getText().isEmpty()) {
+			errors.setText("Controlla i campi vuoti");
+		} else {
 		int err;
 		//chiama le funzioni handler definite nella classe WQClient associata al client che sta gestendo
-		err = client_master.login_handler(userfield.getText(), passfield.getText());
+		err = clientMaster.login_handler(userfield.getText(), passfield.getText());
 		errors.setText(WQClient.codetoString(err));
-		if (err==12) client_master.gotoMain();
+		if (err==12) clientMaster.gotoMain();
+		}
 	}
 	
 	@FXML
 	private void registerbtnAction(ActionEvent event) {
-		try {
-			int err;
-			err = WQClient.regGest.user_registration(userfield.getText(), passfield.getText());
-			errors.setText(WQClient.codetoString(err));
-		} catch (RemoteException | NullPointerException e) {
-			e.printStackTrace();
+		if (passfield.getText().isEmpty() || userfield.getText().isEmpty()) {
+			errors.setText("Controlla i campi vuoti");
+		} else {
+			try {
+				int err;
+				err = WQClient.regGest.user_registration(userfield.getText(), passfield.getText());
+				errors.setText(WQClient.codetoString(err));
+			} catch (RemoteException | NullPointerException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

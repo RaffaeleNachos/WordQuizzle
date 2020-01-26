@@ -15,18 +15,11 @@ public class WQServer {
 	
 	private static ThreadPoolExecutor executor;
 	private static LinkedBlockingQueue<Runnable> myQueue;
-	private static String passwordPath = "./passwords.json";
-	private static String userPath = "./users.json";
 
 	public static void main(String[] args) {
-		System.out.println("Server Starting...");
-		WQDatabase db = null;
-		if (!Files.exists(Paths.get(passwordPath)) || !Files.exists(Paths.get(userPath))) {
-			db = new WQDatabase(false);
-		} 
-		else {
-			db = new WQDatabase(true);
-		}
+		System.out.println("WQServer Starting...");
+		//creazione istanza del database
+		WQDatabase db = new WQDatabase();
 		try {
 			//esportazione oggetto remoto
 			RegistrationInterface stub = (RegistrationInterface) UnicastRemoteObject.exportObject(db, 0);
@@ -36,13 +29,13 @@ public class WQServer {
 			//rebind altrimenti eccezione
 			r.rebind("USER-REG", stub);
 		} catch (RemoteException e) {
-			System.err.println("Qualcosa è andato storto nella procedura RMI");
+			System.err.println("Something went wrong with RMI procedure");
 			e.printStackTrace();
 		}
 		myQueue = new LinkedBlockingQueue<Runnable>();
-		//maxthread 50, max time in idel 2minutes
+		//maxthread 50, max time in idle 2minutes
 		executor = new ThreadPoolExecutor(50, 100, 320000, TimeUnit.MILLISECONDS, myQueue);
-		System.out.println("Server Ready");
+		System.out.println("WQServer Ready!");
 		ServerSocket serverSocket;
 		try {
 			serverSocket = new ServerSocket(6790);

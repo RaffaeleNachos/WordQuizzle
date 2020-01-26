@@ -72,12 +72,11 @@ public class WQChallenge extends Thread{
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		//scelgo le K parole
+		//scelgo le K parole randomicamente
 		for (int i = 0; i < K; i++) {
-			//System.out.println("size: " + (int) (Math.random() * ((jarr.size()))) + " prima parola " + (String) jarr.get(0) + " parola scelta " + (String) jarr.get((int) (Math.random() * ((jarr.size())))));
 			selectedWords.add((String) jarr.get((int) ((Math.random() * ((jarr.size()))))));
 		}
-		System.out.println("Parole italiane scelte: " + selectedWords.toString());
+		System.out.println("WQChallenge | italian words choosen: " + selectedWords.toString());
 		try {
 			//creo ServerSocketChannel per poterlo settare in modalità non bloccante
 			//il SocketChannel è creato implicitamente
@@ -99,7 +98,7 @@ public class WQChallenge extends Thread{
 		//finchè entrambi non hanno finito o il thread non è interrotto
 		while (endusers.get() != 2 && !Thread.currentThread().isInterrupted()) { 
 			try {
-				System.out.println("Server | Aspetto sulla select");
+				System.out.println("WQChallenge | waiting on select()");
 				selector.select();
 			} catch (IOException ex) {
 				ex.printStackTrace(); 
@@ -115,10 +114,10 @@ public class WQChallenge extends Thread{
 				iterator.remove();
 				try {
 					if (key.isAcceptable()) {
-						System.out.println("Server | pronta una chiave di accettazione");
+						System.out.println("WQChallenge | key is acceptable");
 						ServerSocketChannel server = (ServerSocketChannel) key.channel(); 
 						SocketChannel client = server.accept(); 
-						System.out.println("Connessione accettata verso: " + client); 
+						System.out.println("WQChallenge | Connection accepted from: " + client.getRemoteAddress());
 						client.configureBlocking(false);
 						//creo una nuova chiave associata alla socket client
 						SelectionKey clientkey = client.register(selector, SelectionKey.OP_WRITE, new WQWord(null, 0));
@@ -127,13 +126,13 @@ public class WQChallenge extends Thread{
 						if (translatedWords == null) {
 							translatedWords = new ArrayList<>();
 							translateWords();
-							System.out.println("Traduzioni: " + translatedWords.toString());
-							//timer della sfida
+							System.out.println("WQChallenge | english words translated: " + translatedWords.toString());
+							System.out.println("WQChallenge | timer starts");
 							new WQChallTimer(30, this);
 						}
 					}
 					else if (key.isWritable()) {
-						System.out.println("Server | pronta una chiave in scrittura");
+						System.out.println("WQChallenge | key is writable");
 						SocketChannel client = (SocketChannel) key.channel();
 						WQWord myWord = (WQWord) key.attachment();
 						//se la parola è null vuol dire che è stata scritta tutta e se ne può inviare una nuova
@@ -143,9 +142,9 @@ public class WQChallenge extends Thread{
 							if (myWord.getIndex() < K && endusers.get() != 1 && timeover.get()==0) {
 								//percentuale che invia il client al server per la progressbar
 								double perc = (double) myWord.getIndex() * (double) ( 1.0 / (double) (K - 1));
-								System.out.println(perc);
 								//metto la parola in italiano seguita dalla percentuale da assegnare alla progressbar
 								myWord.setWord(selectedWords.get(myWord.getIndex()) + " " + perc);
+								System.out.println("WQChallenge | writing " + myWord.getWord());
 							}
 							//nel caso in cui uno dei due termina (enduser è 1) oppure le parole sono terminate oppure il timer è scaduto
 							else {
@@ -159,24 +158,26 @@ public class WQChallenge extends Thread{
 								}
 								WQWord A = (WQWord) finalkeys.get(0).attachment();
 								WQWord B = (WQWord) finalkeys.get(1).attachment();
-								if (A!=null) System.out.println(A.stat.username);
-								if (B!=null) System.out.println(B.stat.username);
 								//se i punteggi sono uguali parità
 								if (A.stat.chPoints == B.stat.chPoints) {
 									myWord.setWord(firsttoken + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " DRAW");
+									System.out.println("WQChallenge | writing " + myWord.getWord());
 								}
 								else if (A.stat.chPoints > B.stat.chPoints && myWord.stat.username.equals(A.stat.username)) {
 									//System.out.println("ha vinto " + A.stat.username + " con punti " + A.stat.chPoints + " contro " + B.stat.username + " con punti " + B.stat.chPoints);
 									myWord.setWord(firsttoken + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " WIN");
 									//aggiungo punti bonus
 									addPointsToWinner(myWord.stat.username);
+									System.out.println("WQChallenge | writing " + myWord.getWord());
 								}
 								else if (B.stat.chPoints > A.stat.chPoints && myWord.stat.username.equals(B.stat.username)) {
 									//System.out.println("ha vinto " + B.stat.username + " con punti " + B.stat.chPoints + " contro " + A.stat.username + " con punti " + A.stat.chPoints);
 									myWord.setWord(firsttoken + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " WIN");
 									addPointsToWinner(myWord.stat.username);
+									System.out.println("WQChallenge | writing " + myWord.getWord());
 								}
 								else myWord.setWord(firsttoken + myWord.stat.chPoints + " " + myWord.stat.correctWords + " " + myWord.stat.wrongWords + " LOSE");
+								System.out.println("WQChallenge | writing " + myWord.getWord());
 								endusers.incrementAndGet();
 							}
 						}
@@ -184,20 +185,21 @@ public class WQChallenge extends Thread{
 						int bWrite = client.write(end);
 						//se ho scritto tutto rimetto la chiave in read
 						if (bWrite == myWord.getWord().length()) {
+							System.out.println("WQChallenge | written: " + bWrite + " bytes");
 							myWord.setWord(null);
 							key.attach(myWord);
 							key.interestOps(SelectionKey.OP_READ);
-							System.out.println("Server | key impostata su read");
+							System.out.println("WQChallenge | key set on read");
 						}
 						//se il client chiude la socket o termina la write restituisce -1
 						else if (bWrite == -1) {
 							key.cancel();
 							key.channel().close();
-							System.out.println("Server | socket chiusa dal client");
+							System.out.println("WQChallenge | socket closed by the client");
 						}
 						//se non ha scritto tutto
 						else {
-							System.out.println("Server | scrivo: " + bWrite + " bytes");
+							System.out.println("WQChallenge | written: " + bWrite + " bytes");
 							//la flip server per la decodifica
 							end.flip();
 							//setto la restante parola e non cambio interesse della chiave
@@ -206,7 +208,7 @@ public class WQChallenge extends Thread{
 						}
 					}
 					else if (key.isReadable()) {
-						System.out.println("Server | pronta una chiave in lettura");
+						System.out.println("WQChallenge | key is readable");
 						SocketChannel client = (SocketChannel) key.channel();
 						WQWord myWord = (WQWord) key.attachment();
 						String read = "";
@@ -216,7 +218,7 @@ public class WQChallenge extends Thread{
 						int bRead = client.read(input);
 						//se il buffer è pieno ritorna a leggere al ciclo dopo
 						if (bRead == 1024){
-							System.out.println("Server | leggo: " + bRead + " bytes");
+							System.out.println("WQChallenge | read: " + bRead + " bytes");
 							input.flip();
 							read = read + StandardCharsets.UTF_8.decode(input).toString();
 							myWord.setWord(read);
@@ -224,10 +226,10 @@ public class WQChallenge extends Thread{
 						}
 						//se ho letto meno della dimensione ha letto tutto
 						else if (bRead < 1024) {
-							System.out.println("Server | leggo: " + bRead + " bytes");
+							System.out.println("WQChallenge | read: " + bRead + " bytes");
 							input.flip();
 							read = read + StandardCharsets.UTF_8.decode(input).toString();
-							System.out.println(read);
+							System.out.println("WQChallenge | read: " + read);
 							if (read.equals("CHEXITED")) {
 								endusers.incrementAndGet();
 								key.cancel();
@@ -245,14 +247,14 @@ public class WQChallenge extends Thread{
 								myWord.incIndex();
 								key.attach(myWord);
 								key.interestOps(SelectionKey.OP_WRITE);
-								System.out.println("Server | key impostata su write");
+								System.out.println("WQChallenge | key set on write");
 							}
 						}
 						//se il client chiude la socket o termina, la read restituisce -1
 						else if (bRead == -1) {
 							key.cancel();
 							key.channel().close();
-							System.out.println("Server | socket chiusa dal client");
+							System.out.println("WQChallenge | socket closed by the client");
 						}
 					}
 				} catch (IOException ex) {
@@ -261,14 +263,13 @@ public class WQChallenge extends Thread{
 					try {
 						key.channel().close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
 			}
 		}
 		db.updateUJSON();
-		System.out.println("Challenge Thread Shutdown...");
+		System.out.println("WQChallenge Thread Shutdown...");
 	}
 	
 	public class Statistics{
@@ -315,8 +316,6 @@ public class WQChallenge extends Thread{
 		}
 	}
 
-	//chiedere se conviene chiamare ogni volta il server delle API oppure tutto insieme
-	//nel mio caso ho un thread che si occupa del controllo della parola sarebbe meglio farlo direttamente in questo thread
 	public void translateWords() throws IOException {
 		//traduzione k parole
 		for (int i = 0; i < selectedWords.size(); i++) {
@@ -337,7 +336,6 @@ public class WQChallenge extends Thread{
 				//toLowercase perchè spesso la traduzione ha delle lettere maiuscole e può dare problemi per il controllo di correttezza
 				translatedWords.add(i, (String) smallobj.get("translatedText").toString().toLowerCase());
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
             conn.disconnect();

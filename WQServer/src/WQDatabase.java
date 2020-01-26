@@ -39,23 +39,23 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	private static String ppath = "./passwords.json";
 	private static String upath = "./users.json";
 	
-	public WQDatabase(boolean exist) {
+	public WQDatabase() {
 		//se non esistono i file di persistenza
-		if (exist == false) {
-			System.out.println("Persistencies files not present");
+		if (!Files.exists(Paths.get(ppath)) || !Files.exists(Paths.get(upath))) {
+			System.out.println("WQDatabase persistency files not found");
 			passwords = new HashMap<>();
 			users = new HashMap<>();
 		} else { //se i file di persistenza 
-			System.out.println("Persistencies files found");
+			System.out.println("WQDatabase persistency files found");
 			passwords = new HashMap<>();
 			users = new HashMap<>();
 			Gson gson = new Gson();
+			
 			//passwords file
 			String pjson = null;
 			try {
 				pjson = getFileStringy(ppath);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			Type typea = new TypeToken<HashMap<String, String>>(){}.getType();
@@ -66,7 +66,6 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 			try {
 				ujson = getFileStringy(upath);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			Type typeb = new TypeToken<HashMap<String, WQUser>>(){}.getType();
@@ -74,7 +73,6 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		}
 	}
 	
-	//nella regsitrazione aggiungo i dati nel database degli utenti per il login poi inserisco una istanza di user nel grafo
 	@Override
 	public synchronized int user_registration(String nickname, String password) throws RemoteException, NullPointerException{
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
@@ -84,9 +82,10 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		if (passwords.put(nickname, hashMyPass(nickname + password)) == null) {
 			if (!users.containsKey(nickname)) {
 				users.put(nickname, new WQUser(nickname));
-				//aggiorno entrambi i file (db utenti e password) con la nuova registrazione
+				//aggiorno entrambi i file (utenti e password) con la nuova registrazione
 				updatePJSON();
 				updateUJSON();
+				System.out.println("WQDatabase new user registration received");
 				return 10;
 			}
 			else return 11;
@@ -100,7 +99,9 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		if (passwords.containsKey(nickname)) {
 			if (passwords.get(nickname).equals(hashMyPass(nickname + password))) {
 				if (users.get(nickname).online == true) return 15;
+				//pongo online l'utente
 				users.get(nickname).online = true;
+				//setto le informazioni riguardo l'indirizzo e la porta del UDP delle notifiche del client
 				users.get(nickname).setIA(ineta);
 				users.get(nickname).setPort(port);
 				return 12;
@@ -114,8 +115,8 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	public synchronized int user_logout(String nickname) throws NullPointerException{
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {
-				users.get(nickname).online = false;
-				return 16;
+			users.get(nickname).online = false;
+			return 16;
 		} else {
 			return 14;
 		}
@@ -172,7 +173,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		}
 	}
 	
-	public JSONArray friend_list(String nickname) {
+	public synchronized JSONArray friend_list(String nickname) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {
 			//nel caso della sola lista di amici (senza i punti) si potrebbe pensare di potersi risparmiare una iterazione sulla lista 
@@ -188,7 +189,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		return null;
 	}
 	
-	public JSONArray show_ranking(String nickname) {
+	public synchronized JSONArray show_ranking(String nickname) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {
 			Iterator<String> itr = users.get(nickname).getFriends().iterator();
@@ -215,7 +216,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	}
 	
 	//metodo che mi restituisce una istanza di user, mi serve per permettere al thread della challenge di aggiungere punti al giocatore
-	public WQUser getUser(String nickname) {
+	public synchronized WQUser getUser(String nickname) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {
 			return users.get(nickname);
@@ -243,7 +244,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
-						//System.out.println("ho inviato " + tmp);
+						System.out.println("WQDatabase send UDP: " + tmp);
 						return 21;
 					}
 					else return 22;
@@ -265,10 +266,10 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickname).getIA(), users.get(nickname).getPort());
 		try {
 			s.send(mypacket);
+			System.out.println("WQDatabase send UDP: " + tmp);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//System.out.println("ho inviato " + tmp);
 	}
 	
 	//nel caso in cui la sfida non sia accetatta è scaduto il timer avviso il client dello sfidante
@@ -278,10 +279,10 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickname).getIA(), users.get(nickname).getPort());
 		try {
 			s.send(mypacket);
+			System.out.println("WQDatabase send UDP: " + tmp);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//System.out.println("ho inviato " + tmp);
 	}
 	
 	//inviati allo sfidato
@@ -291,10 +292,10 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		DatagramPacket mypacket = new DatagramPacket(buffer, buffer.length, users.get(nickfriend).getIA(), users.get(nickfriend).getPort());
 		try {
 			s.send(mypacket);
+			System.out.println("WQDatabase send UDP: " + tmp);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//System.out.println("ho inviato " + tmp);		
 	}
 	
 	//metodo che si occupa di hashare le password tramite l'algoritmo di hashing one-way SHA-256
@@ -321,7 +322,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 	}
 	
 	public static String getFileStringy(String path) throws IOException {
-		//creo un channel per la lettura del file
+		//creo un channel per la lettura del file (NIO)
 		FileChannel inChannel = FileChannel.open(Paths.get(path), StandardOpenOption.READ);
 		ByteBuffer buffer = ByteBuffer.allocateDirect(1024*1024);
         boolean stop = false;

@@ -49,15 +49,15 @@ public class MainViewController {
 	@FXML
 	private AnchorPane notifyPane;
 
-	private WQClient client_master;
-	private WQNotify notify_master;
+	private WQClient clientMaster;
+	private WQNotify notifyMaster;
 	
 	//arraylist di notifiche
 	private LinkedList<Notify> notifications = new LinkedList<>();
 	
 	public void setClient(WQClient client, WQNotify notifier) {
-        this.client_master = client;
-        this.notify_master = notifier;
+        this.clientMaster = client;
+        this.notifyMaster = notifier;
     }
 	
 	public void setPoints(int num_points) {
@@ -76,7 +76,9 @@ public class MainViewController {
 	}
 	
 	public void setNotifyTabInvisible() {
-		notifyPane.setVisible(false);
+		//controllo se non ci sono più notifiche (mi serve nel caso in cui ritorni da una partita ma qualcuno nel frattempo mi ha chiesto di sfidarlo)
+		if(notifications.isEmpty()) notifyPane.setVisible(false);
+		else setNotifyTabVisible();
 	}
 	
 	//popola la listview della GUI
@@ -87,37 +89,37 @@ public class MainViewController {
 	
 	public void logoutbtnAction(ActionEvent event) {
 		int err;
-		err = client_master.logout_handler();
+		err = clientMaster.logout_handler();
 		ch_error.setText(WQClient.codetoString(err));
-		if (err==16) client_master.gotoLogin();
+		if (err==16) clientMaster.gotoLogin();
 	}
 	
 	public void addbtnAction(ActionEvent event) {
 		int err;
-		err = client_master.add_handler(nickChall.getText());
+		err = clientMaster.add_handler(nickChall.getText());
 		ch_error.setText(WQClient.codetoString(err));
-		populateList(client_master.list_handler());
+		populateList(clientMaster.list_handler());
 	}
 	
 	public void delbtnAction(ActionEvent event) {
 		int err;
-		err = client_master.del_handler(nickChall.getText());
+		err = clientMaster.del_handler(nickChall.getText());
 		ch_error.setText(WQClient.codetoString(err));
-		populateList(client_master.list_handler());
+		populateList(clientMaster.list_handler());
 	}
 	
 	public void togglebtnAction(ActionEvent event) {
 		if (toggleRanking.isSelected()) {
-			populateList(client_master.list_handler());
+			populateList(clientMaster.list_handler());
 		} else {
-			populateList(client_master.rank_handler());
+			populateList(clientMaster.rank_handler());
 		}
 	}
 	
 	//per lo sfidato nella tab delle notifiche accettazione
 	public void declinebtnAction(ActionEvent event) {
 		Notify removed = notifications.removeLast();
-		notify_master.decline(removed.destIA, removed.UDPport);
+		notifyMaster.decline(removed.destIA, removed.UDPport);
 		if (notifications.isEmpty()) setNotifyTabInvisible();
 		else setNotifyTabVisible();
 	}
@@ -125,17 +127,17 @@ public class MainViewController {
 	//per lo sfidato nella tab delle notifoiche accettazione
 	public void acceptbtnAction(ActionEvent event) {
 		Notify removed = notifications.removeLast();
-		notify_master.accept(removed.destIA, removed.UDPport);
-		client_master.TCPport = removed.TCPport;
-		setNotifyTabInvisible();
+		notifyMaster.accept(removed.destIA, removed.UDPport);
+		clientMaster.ChallengeTCPport = removed.TCPport;
 		notifications.clear();
-		client_master.gotoGame();
+		setNotifyTabInvisible();
+		clientMaster.gotoGame();
 	}
 	
 	//per lo sfidante nel main controller
 	public void challengebtnAction(ActionEvent event) {
 		int err;
-		err = client_master.chall_handler(nickChall.getText());
+		err = clientMaster.chall_handler(nickChall.getText());
 		ch_error.setText(WQClient.codetoString(err));
 		//se la richiesta è inviata non permetto di inviarne un'altra fino a che non scada il timeout T1
 		if (err==21) {
@@ -146,7 +148,7 @@ public class MainViewController {
 	
 	public void addNotification(String username, InetAddress destIA, int TCPport, int UDPport) {
 		notifications.addFirst(new Notify(username, destIA, TCPport, UDPport));
-		System.out.println("aggiunto");
+		System.out.println("MainController | new notification added");
 		setNotifyTabVisible();
 	}
 	
@@ -156,9 +158,12 @@ public class MainViewController {
 				notifications.remove(i);
 			}
 		}
+		System.out.println("MainController | notification removed");
 		setNotifyTabVisible();
 	}
 	
+	//classe delle notifiche, per ogni notifica mi salvo l'indirizzo di destinazione (se ci sono più server so a quale mandarlo), la porta TCP della challenge 
+	//e la sua porta UDP (del server)
 	public class Notify{
 		InetAddress destIA;
 		int TCPport;
