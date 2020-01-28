@@ -173,6 +173,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public synchronized JSONArray friend_list(String nickname) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {
@@ -189,6 +190,7 @@ public class WQDatabase extends RemoteServer implements RegistrationInterface{
 		return null;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public synchronized JSONArray show_ranking(String nickname) {
 		if (nickname == null) throw new NullPointerException("Invalid nickname (NULL)");
 		if (users.containsKey(nickname)) {

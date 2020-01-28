@@ -80,7 +80,7 @@ public class WQClient extends Application{
 		try {
 			//carica il file di stile della schermata
 			loader = new FXMLLoader();
-			loader.setLocation(Paths.get("src/views/QuizzleLogin.fxml").toUri().toURL());
+			loader.setLocation(Paths.get("views/QuizzleLogin.fxml").toUri().toURL());
 			Parent layoutmain = loader.load();
 			//a questo punto setta il controller dei vari componenti della gui -> RegisterLoginController
         	logincontroller = loader.getController();
@@ -102,7 +102,7 @@ public class WQClient extends Application{
 	public void gotoMain() {
 		try {
 			loader = new FXMLLoader();
-			loader.setLocation(Paths.get("src/views/MainView.fxml").toUri().toURL());
+			loader.setLocation(Paths.get("views/MainView.fxml").toUri().toURL());
 			Parent layoutmain = loader.load();
 			//setta il controller per gli elementi della gui della finestra main
 			maincontroller = loader.getController();
@@ -134,7 +134,7 @@ public class WQClient extends Application{
 	public void gotoGame() {
 		try {
 			loader = new FXMLLoader();
-			loader.setLocation(Paths.get("src/views/GameView.fxml").toUri().toURL());
+			loader.setLocation(Paths.get("views/GameView.fxml").toUri().toURL());
 			Parent layoutmain = loader.load();
 			//setto controller per il gioco
 			gamecontroller = loader.getController();

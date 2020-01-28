@@ -16,13 +16,13 @@
    <bottom>
       <AnchorPane prefHeight="106.0" prefWidth="600.0" style="-fx-background-color: #213862;" BorderPane.alignment="CENTER">
          <children>
-            <ProgressBar fx:id="progressBar" layoutX="25.0" layoutY="60.0" prefHeight="20.0" prefWidth="419.0" progress="0.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="150.0" />
+            <ProgressBar fx:id="progressBar" layoutX="25.0" layoutY="60.0" prefHeight="20.0" prefWidth="419.0" progress="0.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="150.0" />
             <Label fx:id="labelStatus" alignment="CENTER" contentDisplay="CENTER" layoutX="16.0" layoutY="23.0" prefHeight="17.0" prefWidth="554.0" text="Status:" textFill="WHITE" wrapText="true" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
                <font>
                   <Font name="Arial" size="14.0" />
                </font>
             </Label>
-            <Button fx:id="btnExit" alignment="CENTER" layoutX="469.0" layoutY="56.0" mnemonicParsing="false" onAction="#exitbtnAction" style="-fx-background-color: #E3463F;" text="Exit Challenge" wrapText="true" AnchorPane.rightAnchor="22.0">
+            <Button fx:id="btnExit" alignment="CENTER" layoutX="469.0" layoutY="56.0" mnemonicParsing="false" onAction="#exitbtnAction" style="-fx-background-color: #E3463F;" text="Exit Challenge" wrapText="true" AnchorPane.rightAnchor="20.0">
                <effect>
                   <DropShadow />
                </effect>
@@ -68,7 +68,7 @@
                         <Font name="Arial" size="14.0" />
                      </font>
                   </TextField>
-                  <Button fx:id="btnSend" alignment="CENTER" layoutX="120.0" layoutY="237.0" mnemonicParsing="false" onAction="#sendbtnAction" style="-fx-background-color: #FF9800;" text="Send" wrapText="true" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="120.0" AnchorPane.topAnchor="235.0">
+                  <Button fx:id="btnSend" alignment="CENTER" layoutX="120.0" layoutY="237.0" mnemonicParsing="false" onAction="#sendbtnAction" style="-fx-background-color: #FF9800;" text="Send" wrapText="true" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="110.0" AnchorPane.topAnchor="235.0">
                      <effect>
                         <DropShadow />
                      </effect>
