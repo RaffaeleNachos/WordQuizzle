@@ -38,6 +38,11 @@ public class WQTask implements Runnable{
 					writer.write(Integer.toString(err));
 					writer.newLine(); 
 					writer.flush();
+					//se il login non è corretto devo uscire dal thread
+					if (err!=12) {
+						System.out.println(Thread.currentThread().getName() + " WQTask Exiting...");
+						return;
+					}
 				}
 				else if (tokens[0].equals("ADD") && tokens.length == 3) {
 					writer.write(Integer.toString(db.add_friend(tokens[1], tokens[2])));
@@ -76,7 +81,6 @@ public class WQTask implements Runnable{
 					int err = db.challenge(tokens[1], tokens[2], clientUDPsocket, TCPport);
 					//se c'è stato qualche problema allora mi occupo di chiudere il thread della challenge e mandare il messaggio di errore al client su TCP
 					if (err!=21 && wqc.isAlive()) {
-						System.out.println("WQTask Login Failed");
 						if (wqc.isAlive()) wqc.interrupt();
 						writer.write(Integer.toString(err));
 						writer.newLine();

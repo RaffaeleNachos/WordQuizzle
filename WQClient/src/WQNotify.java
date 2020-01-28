@@ -81,8 +81,8 @@ public class WQNotify extends Thread{
 				}
 			}
 		} catch (SocketException e) {
-			System.out.println("WQNotify | socket is closed");
-			e.printStackTrace();
+			System.out.println("WQNotify | socket is closed, exiting thread...");
+			//e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

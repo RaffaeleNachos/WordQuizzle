@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -64,17 +65,20 @@ public class WQChallenge extends Thread{
 		try {
 			//leggo il file json delle parole
 			strjson = WQDatabase.getFileStringy("./words.json");
+		} catch (ClosedByInterruptException e) {
+			System.out.println("WQChallenge | thread interrupted, exiting thread");
+			return;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		try {
 			jarr = (JSONArray) parser.parse(strjson);
+			//scelgo le K parole randomicamente
+			for (int i = 0; i < K; i++) {
+				selectedWords.add((String) jarr.get((int) ((Math.random() * ((jarr.size()))))));
+			}
 		} catch (ParseException e) {
 			e.printStackTrace();
-		}
-		//scelgo le K parole randomicamente
-		for (int i = 0; i < K; i++) {
-			selectedWords.add((String) jarr.get((int) ((Math.random() * ((jarr.size()))))));
 		}
 		System.out.println("WQChallenge | italian words choosen: " + selectedWords.toString());
 		try {
@@ -268,7 +272,8 @@ public class WQChallenge extends Thread{
 				}
 			}
 		}
-		db.updateUJSON();
+		//i dati vengono aggiornati solo nel caso in cui la partita è stata effettuata
+		if (endusers.get()==2) db.updateUJSON();
 		System.out.println("WQChallenge Thread Shutdown...");
 	}
 	

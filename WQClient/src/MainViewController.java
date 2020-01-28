@@ -159,7 +159,8 @@ public class MainViewController {
 			}
 		}
 		System.out.println("MainController | notification removed");
-		setNotifyTabVisible();
+		if (notifications.isEmpty()) setNotifyTabInvisible();
+		else setNotifyTabVisible();
 	}
 	
 	//classe delle notifiche, per ogni notifica mi salvo l'indirizzo di destinazione (se ci sono più server so a quale mandarlo), la porta TCP della challenge 
